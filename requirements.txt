@@ -1,0 +1,16 @@
+# Phase 1: Supabase data extraction
+supabase>=2.24.0
+
+# Phase 1: GitHub crawler
+PyGithub>=2.1.1
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+structlog>=24.1.0
+tenacity>=8.2.3
+
+# Phase 2: LLM extraction
+anthropic>=0.18.0
+openai>=1.30.0
+
+# Common
+python-dotenv>=1.0.0

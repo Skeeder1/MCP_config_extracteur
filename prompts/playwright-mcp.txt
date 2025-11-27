@@ -1,0 +1,768 @@
+Tu analyses un serveur MCP hébergé sur GitHub pour extraire sa configuration de démarrage.
+
+# MÉTADONNÉES DU REPOSITORY
+Nom: playwright-mcp
+Description: Playwright MCP server
+Topics: mcp, playwright
+Langage principal: TypeScript
+Homepage: https://www.npmjs.com/package/@playwright/mcp
+
+# FICHIERS DISPONIBLES
+
+Note : Tu recevras entre 3 et 6 fichiers selon leur disponibilité dans le repo.
+Les fichiers ci-dessous sont ceux qui ont été récupérés avec succès.
+
+
+## README.md
+```
+## Playwright MCP
+
+A Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+
+### Key Features
+
+- **Fast and lightweight**. Uses Playwright's accessibility tree, not pixel-based input.
+- **LLM-friendly**. No vision models needed, operates purely on structured data.
+- **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
+
+### Requirements
+- Node.js 18 or newer
+- VS Code, Cursor, Windsurf, Claude Desktop, Goose or any other MCP client
+
+<!--
+// Generate using:
+node utils/generate-links.js
+-->
+
+### Getting started
+
+First, install the Playwright MCP server with your client.
+
+**Standard config** works in most of the tools:
+
+```js
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+
+<details>
+<summary>Amp</summary>
+
+Add via the Amp VS Code extension settings screen or by updating your settings.json file:
+
+```json
+"amp.mcpServers": {
+  "playwright": {
+    "command": "npx",
+    "args": [
+      "@playwright/mcp@latest"
+    ]
+  }
+}
+```
+
+**Amp CLI Setup:**
+
+Add via the `amp mcp add`command below
+
+```bash
+amp mcp add playwright -- npx @playwright/mcp@latest
+```
+
+</details>
+
+<details>
+<summary>Claude Code</summary>
+
+Use the Claude Code CLI to add the Playwright MCP server:
+
+```bash
+claude mcp add playwright npx @playwright/mcp@latest
+```
+</details>
+
+<details>
+<summary>Claude Desktop</summary>
+
+Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user), use the standard config above.
+
+</details>
+
+<details>
+<summary>Codex</summary>
+
+Use the Codex CLI to add the Playwright MCP server:
+
+```bash
+codex mcp add playwright npx "@playwright/mcp@latest"
+```
+
+Alternatively, create or edit the configuration file `~/.codex/config.toml` and add:
+
+```toml
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+```
+
+For more information, see the [Codex MCP documentation](https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers).
+
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+#### Click the button to install:
+
+[<img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor">](https://cursor.com/en/install-mcp?name=Playwright&config=eyJjb21tYW5kIjoibnB4IEBwbGF5d3JpZ2h0L21jcEBsYXRlc3QifQ%3D%3D)
+
+#### Or install manually:
+
+Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, use `command` type with the command `npx @playwright/mcp@latest`. You can also verify config or add command like arguments via clicking `Edit`.
+
+</details>
+
+<details>
+<summary>Factory</summary>
+
+Use the Factory CLI to add the Playwright MCP server:
+
+```bash
+droid mcp add playwright "npx @playwright/mcp@latest"
+```
+
+Alternatively, type `/mcp` within Factory droid to open an interactive UI for managing MCP servers.
+
+For more information, see the [Factory MCP documentation](https://docs.factory.ai/cli/configuration/mcp).
+
+</details>
+
+<details>
+<summary>Gemini CLI</summary>
+
+Follow the MCP install [guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#configure-the-mcp-server-in-settingsjson), use the standard config above.
+
+</details>
+
+<details>
+<summary>Goose</summary>
+
+#### Click the button to install:
+
+[![Install in Goose](https://block.github.io/goose/img/extension-install-dark.svg)](https://block.github.io/goose/extension?cmd=npx&arg=%40playwright%2Fmcp%40latest&id=playwright&name=Playwright&description=Interact%20with%20web%20pages%20through%20structured%20accessibility%20snapshots%20using%20Playwright)
+
+#### Or install manually:
+
+Go to `Advanced settings` -> `Extensions` -> `Add custom extension`. Name to your liking, use type `STDIO`, and set the `command` to `npx @playwright/mcp`. Click "Add Extension".
+</details>
+
+<details>
+<summary>Kiro</summary>
+
+Follow the MCP Servers [documentation](https://kiro.dev/docs/mcp/). For example in `.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary>LM Studio</summary>
+
+#### Click the button to install:
+
+[![Add MCP Server playwright to LM Studio](https://files.lmstudio.ai/deeplink/mcp-install-light.svg)](https://lmstudio.ai/install-mcp?name=playwright&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyJAcGxheXdyaWdodC9tY3BAbGF0ZXN0Il19)
+
+#### Or install manually:
+
+Go to `Program` in the right sidebar -> `Install` -> `Edit mcp.json`. Use the standard config above.
+</details>
+
+<details>
+<summary>opencode</summary>
+
+Follow the MCP Servers [documentation](https://opencode.ai/docs/mcp-servers/). For example in `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
+    }
+  }
+}
+
+```
+</details>
+
+<details>
+<summary>Qodo Gen</summary>
+
+Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VSCode or IntelliJ → Connect more tools → + Add new MCP → Paste the standard config above.
+
+Click <code>Save</code>.
+</details>
+
+<details>
+<summary>VS Code</summary>
+
+#### Click the button to install:
+
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+
+#### Or install manually:
+
+Follow the MCP install [guide](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server), use the standard config above. You can also install the Playwright MCP server using the VS Code CLI:
+
+```bash
+# For VS Code
+code --add-mcp '{"name":"playwright","command":"npx","args":["@playwright/mcp@latest"]}'
+```
+
+After installation, the Playwright MCP server will be available for use with your GitHub Copilot agent in VS Code.
+</details>
+
+<details>
+<summary>Warp</summary>
+
+Go to `Settings` -> `AI` -> `Manage MCP Servers` -> `+ Add` to [add an MCP Server](https://docs.warp.dev/knowledge-and-collaboration/mcp#adding-an-mcp-server). Use the standard config above.
+
+Alternatively, use the slash command `/add-mcp` in the Warp prompt and paste the standard config from above:
+```js
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Windsurf</summary>
+
+Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use the standard config above.
+
+</details>
+
+### Configuration
+
+Playwright MCP server supports following arguments. They can be provided in the JSON configuration above, as a part of the `"args"` list:
+
+<!--- Options generated by update-readme.js -->
+
+```
+> npx @playwright/mcp@latest --help
+  --allowed-hosts <hosts...>            comma-separated list of hosts this
+                                        server is allowed to serve from.
+                                        Defaults to the host the server is bound
+                                        to. Pass '*' to disable the host check.
+  --allowed-origins <origins>           semicolon-separated list of TRUSTED
+                                        origins to allow the browser to request.
+                                        Default is to allow all.
+                                        Important: *does not* serve as a
+                                        security boundary and *does not* affect
+                                        redirects.
+  --blocked-origins <origins>           semicolon-separated list of origins to
+                                        block the browser from requesting.
+                                        Blocklist is evaluated before allowlist.
+                                        If used without the allowlist, requests
+                                        not matching the blocklist are still
+                                        allowed.
+                                        Important: *does not* serve as a
+                                        security boundary and *does not* affect
+                                        redirects.
+  --block-service-workers               block service workers
+  --browser <browser>                   browser or chrome channel to use,
+                                        possible values: chrome, firefox,
+                                        webkit, msedge.
+  --caps <caps>                         comma-separated list of additional
+                                        capabilities to enable, possible values:
+                                        vision, pdf.
+  --cdp-endpoint <endpoint>             CDP endpoint to connect to.
+  --cdp-header <headers...>             CDP headers to send with the connect
+                                        request, multiple can be specified.
+  --config <path>                       path to the configuration file.
+  --device <device>                     device to emulate, for example: "iPhone
+                                        15"
+  --executable-path <path>              path to the browser executable.
+  --extension                           Connect to a running browser instance
+                                        (Edge/Chrome only). Requires the
+                                        "Playwright MCP Bridge" browser
+                                        extension to be installed.
+  --grant-permissions <permissions...>  List of permissions to grant to the
+                                        browser context, for example
+                                        "geolocation", "clipboard-read",
+                                        "clipboard-write".
+  --headless                            run browser in headless mode, headed by
+                                        default
+  --host <host>                         host to bind server to. Default is
+                                        localhost. Use 0.0.0.0 to bind to all
+                                        interfaces.
+  --ignore-https-errors                 ignore https errors
+  --init-page <path...>                 path to TypeScript file to evaluate on
+                                        Playwright page object
+  --init-script <path...>               path to JavaScript file to add as an
+                                        initialization script. The script will
+                                        be evaluated in every page before any of
+                                        the page's scripts. Can be specified
+                                        multiple times.
+  --isolated                            keep the browser profile in memory, do
+                                        not save it to disk.
+  --image-responses <mode>              whether to send image responses to the
+                                        client. Can be "allow" or "omit",
+                                        Defaults to "allow".
+  --no-sandbox                          disable the sandbox for all process
+                                        types that are normally sandboxed.
+  --output-dir <path>                   path to the directory for output files.
+  --port <port>                         port to listen on for SSE transport.
+  --proxy-bypass <bypass>               comma-separated domains to bypass proxy,
+                                        for example
+                                        ".com,chromium.org,.domain.com"
+  --proxy-server <proxy>                specify proxy server, for example
+                                        "http://myproxy:3128" or
+                                        "socks5://myproxy:8080"
+  --save-session                        Whether to save the Playwright MCP
+                                        session into the output directory.
+  --save-trace                          Whether to save the Playwright Trace of
+                                        the session into the output directory.
+  --save-video <size>                   Whether to save the video of the session
+                                        into the output directory. For example
+                                        "--save-video=800x600"
+  --secrets <path>                      path to a file containing secrets in the
+                                        dotenv format
+  --shared-browser-context              reuse the same browser context between
+                                        all connected HTTP clients.
+  --storage-state <path>                path to the storage state file for
+                                        isolated sessions.
+  --test-id-attribute <attribute>       specify the attribute to use for test
+                                        ids, defaults to "data-testid"
+  --timeout-action <timeout>            specify action timeout in milliseconds,
+                                        defaults to 5000ms
+  --timeout-navigation <timeout>        specify navigation timeout in
+                                        milliseconds, defaults to 60000ms
+  --user-agent <ua string>              specify user agent string
+  --user-data-dir <path>                path to the user data directory. If not
+                                        specified, a temporary directory will be
+                                        created.
+  --viewport-
+
+[... truncated ...]
+```
+
+## package.json
+```
+{
+  "name": "@playwright/mcp",
+  "version": "0.0.48",
+  "description": "Playwright Tools for MCP",
+  "mcpName": "com.microsoft/playwright-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/microsoft/playwright-mcp.git"
+  },
+  "homepage": "https://playwright.dev",
+  "engines": {
+    "node": ">=18"
+  },
+  "author": {
+    "name": "Microsoft Corporation"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "lint": "npm run update-readme",
+    "update-readme": "node update-readme.js",
+    "docker-build": "docker build --no-cache -t playwright-mcp-dev:latest .",
+    "docker-rm": "docker rm playwright-mcp-dev",
+    "docker-run": "docker run -it -p 8080:8080 --name playwright-mcp-dev playwright-mcp-dev:latest",
+    "test": "playwright test",
+    "ctest": "playwright test --project=chrome",
+    "ftest": "playwright test --project=firefox",
+    "wtest": "playwright test --project=webkit",
+    "dtest": "MCP_IN_DOCKER=1 playwright test --project=chromium-docker",
+    "npm-publish": "npm run clean && npm run test && npm publish",
+    "copy-config": "cp ../playwright/packages/playwright/src/mcp/config.d.ts . && perl -pi -e \"s|import type \\* as playwright from 'playwright-core';|import type * as playwright from 'playwright';|\" ./config.d.ts",
+    "roll": "npm run copy-config && npm run lint"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "dependencies": {
+    "playwright": "1.58.0-alpha-1763757971000",
+    "playwright-core": "1.58.0-alpha-1763757971000"
+  },
+  "bin": {
+    "mcp-server-playwright": "cli.js"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "@playwright/test": "1.58.0-alpha-1763757971000",
+    "@types/node": "^24.3.0",
+    "zod-to-json-schema": "^3.24.6"
+  }
+}
+
+```
+
+## Dockerfile
+```
+ARG PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# ------------------------------
+# Base
+# ------------------------------
+# Base stage: Contains only the minimal dependencies required for runtime
+# (node_modules and Playwright system dependencies)
+FROM node:22-bookworm-slim AS base
+
+ARG PLAYWRIGHT_BROWSERS_PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH}
+
+# Set the working directory
+WORKDIR /app
+
+RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-cache \
+    --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+  npm ci --omit=dev && \
+  # Install system dependencies for playwright
+  npx -y playwright-core install-deps chromium
+
+# ------------------------------
+# Builder
+# ------------------------------
+FROM base AS builder
+
+RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-cache \
+    --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+  npm ci
+
+# Copy the rest of the app
+COPY *.json *.js *.ts .
+
+# ------------------------------
+# Browser
+# ------------------------------
+# Cache optimization:
+# - Browser is downloaded only when node_modules or Playwright system dependencies change
+# - Cache is reused when only source code changes
+FROM base AS browser
+
+RUN npx -y playwright-core install --no-shell chromium
+
+# ------------------------------
+# Runtime
+# ------------------------------
+FROM base
+
+ARG PLAYWRIGHT_BROWSERS_PATH
+ARG USERNAME=node
+ENV NODE_ENV=production
+ENV PLAYWRIGHT_MCP_OUTPUT_DIR=/tmp/playwright-output
+
+# Set the correct ownership for the runtime user on production `node_modules`
+RUN chown -R ${USERNAME}:${USERNAME} node_modules
+
+USER ${USERNAME}
+
+COPY --from=browser --chown=${USERNAME}:${USERNAME} ${PLAYWRIGHT_BROWSERS_PATH} ${PLAYWRIGHT_BROWSERS_PATH}
+COPY --chown=${USERNAME}:${USERNAME} cli.js package.json ./
+
+# Run in headless and only with chromium (other browsers need more dependencies not included in this image)
+ENTRYPOINT ["node", "cli.js", "--headless", "--browser", "chromium", "--no-sandbox"]
+
+```
+
+
+---
+
+# OBJECTIF
+Extraire la configuration de démarrage du serveur MCP dans un format JSON structuré.
+
+# FORMAT DE SORTIE ATTENDU
+{
+  "name": "nom-du-serveur",
+  "install": "commande d'installation complète" ou null,
+  "command": "commande de démarrage",
+  "args": ["arg1", "arg2"],
+  "env": {
+    "VAR_NAME": {
+      "required": true ou false,
+      "description": "description claire",
+      "default": "valeur par défaut" ou null,
+      "example": "exemple de valeur",
+      "where_to_get": "URL où obtenir la clé" ou null,
+      "validation_regex": "regex de validation" ou null
+    }
+  }
+}
+
+# RÈGLES D'EXTRACTION
+
+## 1. Détermination du Type d'Installation
+
+Analyse dans cet ordre :
+
+**Docker** :
+- Si Dockerfile ou docker-compose.yml existe
+- Si README mentionne "docker run" ou "docker-compose"
+- Format : command="docker", args=["run", "--rm", "-i", "image:tag"]
+
+**NPM/NPX** :
+- Si package.json existe
+- Si package.json contient un champ "bin"
+- Si le package est dans l'organisation @modelcontextprotocol
+- Format NPX : command="npx", args=["-y", "@org/package"]
+- Format NPM : install="npm install -g package", command="package-name"
+
+**Python/Pip** :
+- Si pyproject.toml ou requirements.txt existe
+- Si pyproject.toml contient [project.scripts]
+- Format : install="pip install package", command="python", args=["-m", "package_name"]
+
+**UV (Python moderne)** :
+- Si README mentionne "uvx" ou "uv pip"
+- Format : install="uv pip install package", command="uvx", args=["package"]
+
+**Cargo (Rust)** :
+- Si Cargo.toml existe
+- Format : install="cargo install package", command="package-name"
+
+**Go** :
+- Si go.mod existe
+- Format : install="go install github.com/user/repo@latest", command="repo"
+
+**Build from Source** :
+- Si aucune méthode packagée n'existe
+- Extraire les étapes de build du README
+- Format : install="git clone && cd && build steps", command="./binary ou node dist/index.js"
+
+## 2. Hiérarchie de Priorité pour les Sources
+
+**Ordre de confiance (du plus fiable au moins fiable)** :
+
+1. **Dockerfile CMD/ENTRYPOINT** → Vérité absolue
+   - La commande exacte qui lance le serveur en production
+   - Les ENV définissent les variables obligatoires
+
+2. **docker-compose.yml** → Très fiable
+   - Section "command" révèle la vraie commande
+   - Section "environment" liste toutes les variables
+
+3. **package.json (Node.js)** → Structure exacte
+   - Champ "bin" → nom de la commande installée
+   - Scripts "start" → comment lancer
+   - Si @modelcontextprotocol/* → toujours utiliser npx -y
+
+4. **pyproject.toml (Python)** → Entry point exact
+   - [project.scripts] → nom de la commande
+   - [tool.poetry.scripts] → idem pour Poetry
+
+5. **.env.example** → Variables d'environnement réelles
+   - Liste exhaustive des variables
+   - Exemples de valeurs
+   - Commentaires explicatifs
+
+6. **README.md** → Contexte général
+   - Instructions d'installation
+   - Exemples d'utilisation
+   - Mais souvent incomplet ou obsolète
+
+## 3. Règles Spécifiques par Type
+
+### NPX/NPM
+- Si le package est @modelcontextprotocol/*, toujours : `command="npx", args=["-y", "package-name"]`
+- Ne pas ajouter d'install pour NPX (null)
+- Args supplémentaires depuis README (ex: chemins, --port, etc.)
+
+### Docker
+- args doit TOUJOURS commencer par : ["run", "--rm", "-i"]
+- `--rm` : supprime le container après arrêt
+- `-i` : mode interactif pour stdio
+- NE PAS inclure `-e VAR=value` dans args (MCP Hub l'injectera automatiquement)
+- Juste mettre le nom de l'image en dernier arg
+
+### Python
+- Si [project.scripts] existe, utiliser ce nom exactement
+- Convertir dashes en underscores pour module name (ex: mcp-server → mcp_server)
+- Si UV détecté : command="uvx" est plus moderne que python -m
+
+### Variables d'Environnement
+- `required=true` UNIQUEMENT si le serveur crash au démarrage sans cette variable
+- `required=false` pour variables optionnelles avec comportement par défaut
+- Extraire description depuis commentaires dans .env.example
+- `where_to_get` : URL vers documentation d'API externe (ex: https://platform.openai.com/api-keys)
+
+## 4. Gestion des Cas Ambigus
+
+Si plusieurs méthodes d'installation existent (ex: NPM + Docker) :
+- Choisir la plus simple : NPX > Docker > Pip > Build
+- Mentionner l'alternative dans un champ "notes" si nécessaire
+
+Si information manquante ou contradictoire :
+- Ajouter un champ `"confidence": 0.0-1.0` au JSON
+- Ajouter un champ `"warnings": ["warning1", "warning2"]`
+- Si vraiment impossible : `{"error": "raison", "requires_manual_review": true}`
+
+## 5. Cas Spéciaux
+
+**SSE/WebSocket (serveurs HTTP)** :
+- Si le serveur expose un endpoint HTTP (/sse ou websocket)
+- Ajouter `"transport": "sse"` ou `"transport": "websocket"`
+- La commande doit démarrer un serveur web
+- Exemple : command="node", args=["server.js", "--port", "3000"]
+
+**Arguments dynamiques** :
+- Utiliser ${VAR_NAME} dans args pour indiquer injection de variable
+- Exemple : args=["--api-key", "${API_KEY}"]
+
+# EXEMPLES DE SORTIES ATTENDUES
+
+## Exemple 1 : Serveur NPX simple
+{
+  "name": "filesystem",
+  "install": null,
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
+  "env": {}
+}
+
+## Exemple 2 : Serveur Docker avec env vars
+{
+  "name": "postgres-mcp",
+  "install": "docker pull mcp/postgres:latest",
+  "command": "docker",
+  "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
+  "env": {
+    "DATABASE_URL": {
+      "required": true,
+      "description": "PostgreSQL connection string",
+      "default": null,
+      "example": "postgresql://user:pass@localhost:5432/db",
+      "where_to_get": null,
+      "validation_regex": "^postgresql://.+$"
+    }
+  }
+}
+
+## Exemple 3 : Python avec plusieurs env vars
+{
+  "name": "slack-server",
+  "install": "pip install mcp-server-slack",
+  "command": "python",
+  "args": ["-m", "mcp_server_slack"],
+  "env": {
+    "SLACK_BOT_TOKEN": {
+      "required": true,
+      "description": "Slack Bot User OAuth Token",
+      "default": null,
+      "example": "xoxb-xxx...",
+      "where_to_get": "https://api.slack.com/apps"
+    },
+    "SLACK_TEAM_ID": {
+      "required": true,
+      "description": "Slack workspace ID",
+      "default": null,
+      "example": "T01234567"
+    },
+    "LOG_LEVEL": {
+      "required": false,
+      "description": "Logging verbosity",
+      "default": "INFO",
+      "example": "DEBUG"
+    }
+  }
+}
+
+## Exemple 4 : Build from source
+{
+  "name": "custom-server",
+  "install": "git clone https://github.com/user/server && cd server && npm install && npm run build",
+  "command": "node",
+  "args": ["dist/index.js"],
+  "env": {
+    "API_KEY": {
+      "required": true,
+      "description": "API key for service",
+      "default": null,
+      "example": "sk-xxx..."
+    }
+  }
+}
+
+## Exemple 5 : Extraction incertaine
+{
+  "name": "unclear-server",
+  "install": "npm install -g unclear-server",
+  "command": "unclear-server",
+  "args": [],
+  "env": {},
+  "confidence": 0.6,
+  "warnings": [
+    "README doesn't specify env vars clearly",
+    "No .env.example file found",
+    "Installation steps might be incomplete"
+  ]
+}
+
+## Exemple 6 : Échec d'extraction
+{
+  "error": "Unable to determine installation method - no package manager files found",
+  "requires_manual_review": true,
+  "partial_info": {
+    "name": "unknown-server",
+    "suspected_language": "python"
+  }
+}
+
+# VALIDATION FINALE
+
+Avant de retourner le JSON, vérifie :
+- [ ] Tous les champs requis sont présents (name, command, args, env)
+- [ ] command est une commande valide (npx, python, docker, node, uvx, etc.)
+- [ ] args est un array (peut être vide)
+- [ ] env est un object (peut être vide)
+- [ ] Chaque env var a au minimum : required, description, example
+- [ ] Si install présent, c'est une commande shell valide
+- [ ] Pas de caractères spéciaux non échappés dans les strings
+- [ ] Le JSON est valide et parseable
+
+# FORMAT DE RÉPONSE
+
+RETOURNE UNIQUEMENT LE JSON, AUCUN TEXTE AVANT OU APRÈS.
+PAS DE MARKDOWN, PAS DE BACKTICKS, JUSTE LE JSON RAW.

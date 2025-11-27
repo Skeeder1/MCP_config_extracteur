@@ -1,0 +1,379 @@
+{
+  "metadata": {
+    "extracted_at": "2025-11-27T19:50:04.136402Z",
+    "source_file": "data/output/github_crawled_data.json",
+    "model": "claude-3-haiku-20240307",
+    "test_mode": true,
+    "batch_size": 5,
+    "stats": {
+      "total_repos": 5,
+      "approved": 0,
+      "needs_review": 5,
+      "rejected": 0,
+      "success_rate": 100.0,
+      "auto_approval_rate": 0.0,
+      "avg_confidence_needs_review": 0.5
+    }
+  },
+  "extractions": [
+    {
+      "github_url": "https://github.com/modelcontextprotocol/servers",
+      "github_metadata": {
+        "name": "servers",
+        "full_name": "modelcontextprotocol/servers",
+        "description": "Model Context Protocol Servers",
+        "language": "TypeScript",
+        "topics": [],
+        "stars": 73375,
+        "forks": 8883,
+        "homepage": "https://modelcontextprotocol.io",
+        "default_branch": "main",
+        "created_at": "2024-11-19T01:10:17+00:00",
+        "updated_at": "2025-11-26T19:32:39+00:00"
+      },
+      "config": {
+        "name": "filesystem",
+        "install": null,
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "/path/to/files"
+        ],
+        "env": {},
+        "_llm_metadata": {
+          "input_tokens": 7976,
+          "output_tokens": 232,
+          "model": "claude-3-haiku-20240307",
+          "provider": "anthropic"
+        }
+      },
+      "extraction": {
+        "extracted_at": "2025-11-27T19:49:47.688141Z",
+        "files_analyzed": [
+          "README.md",
+          "package.json"
+        ],
+        "status": "needs_review",
+        "score": -1.0,
+        "confidence": 0.5,
+        "issues": [
+          "Validation failed: '\\n  \"name\"'"
+        ],
+        "warnings": [
+          "Needs manual review"
+        ]
+      }
+    },
+    {
+      "github_url": "https://github.com/upstash/context7",
+      "github_metadata": {
+        "name": "context7",
+        "full_name": "upstash/context7",
+        "description": "Context7 MCP Server -- Up-to-date code documentation for LLMs and AI code editors",
+        "language": "JavaScript",
+        "topics": [
+          "llm",
+          "mcp",
+          "mcp-server",
+          "vibe-coding"
+        ],
+        "stars": 37993,
+        "forks": 1883,
+        "homepage": "https://context7.com",
+        "default_branch": "master",
+        "created_at": "2025-03-26T23:40:39+00:00",
+        "updated_at": "2025-11-26T18:33:53+00:00"
+      },
+      "config": {
+        "name": "context7",
+        "install": null,
+        "command": "npx",
+        "args": [
+          "-y",
+          "@upstash/context7-mcp"
+        ],
+        "env": {
+          "CONTEXT7_API_KEY": {
+            "required": false,
+            "description": "API key for Context7 to access private repositories and get higher rate limits",
+            "default": null,
+            "example": "sk-xxx...",
+            "where_to_get": "https://context7.com/dashboard",
+            "validation_regex": "^sk-[a-zA-Z0-9]+$"
+          }
+        },
+        "_llm_metadata": {
+          "input_tokens": 9054,
+          "output_tokens": 185,
+          "model": "claude-3-haiku-20240307",
+          "provider": "anthropic"
+        }
+      },
+      "extraction": {
+        "extracted_at": "2025-11-27T19:49:50.127023Z",
+        "files_analyzed": [
+          "README.md",
+          "package.json",
+          "Dockerfile"
+        ],
+        "status": "needs_review",
+        "score": -1.0,
+        "confidence": 0.5,
+        "issues": [
+          "Validation failed: '\\n  \"name\"'"
+        ],
+        "warnings": [
+          "Needs manual review"
+        ]
+      }
+    },
+    {
+      "github_url": "https://github.com/microsoft/playwright-mcp",
+      "github_metadata": {
+        "name": "playwright-mcp",
+        "full_name": "microsoft/playwright-mcp",
+        "description": "Playwright MCP server",
+        "language": "TypeScript",
+        "topics": [
+          "mcp",
+          "playwright"
+        ],
+        "stars": 23657,
+        "forks": 1918,
+        "homepage": "https://www.npmjs.com/package/@playwright/mcp",
+        "default_branch": "main",
+        "created_at": "2025-03-21T17:48:36+00:00",
+        "updated_at": "2025-11-26T16:54:33+00:00"
+      },
+      "config": {
+        "name": "playwright-mcp",
+        "install": null,
+        "command": "npx",
+        "args": [
+          "-y",
+          "@playwright/mcp@latest"
+        ],
+        "env": {
+          "PLAYWRIGHT_BROWSERS_PATH": {
+            "required": false,
+            "description": "Path to the directory where Playwright will download and cache the browsers.",
+            "default": "/ms-playwright",
+            "example": "/ms-playwright",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "NODE_ENV": {
+            "required": false,
+            "description": "The Node.js environment.",
+            "default": "production",
+            "example": "production",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "PLAYWRIGHT_MCP_OUTPUT_DIR": {
+            "required": false,
+            "description": "The directory where Playwright MCP will save output files (traces, videos, etc.).",
+            "default": "/tmp/playwright-output",
+            "example": "/tmp/playwright-output",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "USERNAME": {
+            "required": false,
+            "description": "The username to use for the runtime user.",
+            "default": "node",
+            "example": "node",
+            "where_to_get": null,
+            "validation_regex": null
+          }
+        },
+        "_llm_metadata": {
+          "input_tokens": 8176,
+          "output_tokens": 632,
+          "model": "claude-3-haiku-20240307",
+          "provider": "anthropic"
+        }
+      },
+      "extraction": {
+        "extracted_at": "2025-11-27T19:49:55.226677Z",
+        "files_analyzed": [
+          "README.md",
+          "package.json",
+          "Dockerfile"
+        ],
+        "status": "needs_review",
+        "score": -1.0,
+        "confidence": 0.5,
+        "issues": [
+          "Validation failed: '\\n  \"name\"'"
+        ],
+        "warnings": [
+          "Needs manual review"
+        ]
+      }
+    },
+    {
+      "github_url": "https://github.com/ahujasid/blender-mcp",
+      "github_metadata": {
+        "name": "blender-mcp",
+        "full_name": "ahujasid/blender-mcp",
+        "description": null,
+        "language": "Python",
+        "topics": [],
+        "stars": 14295,
+        "forks": 1373,
+        "homepage": null,
+        "default_branch": "main",
+        "created_at": "2025-03-07T09:58:58+00:00",
+        "updated_at": "2025-11-26T18:43:43+00:00"
+      },
+      "config": {
+        "name": "blender-mcp",
+        "install": null,
+        "command": "uvx",
+        "args": [
+          "blender-mcp"
+        ],
+        "env": {
+          "BLENDER_HOST": {
+            "required": false,
+            "description": "Host address for Blender socket server",
+            "default": "localhost",
+            "example": "host.docker.internal",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "BLENDER_PORT": {
+            "required": false,
+            "description": "Port number for Blender socket server",
+            "default": "9876",
+            "example": "9876",
+            "where_to_get": null,
+            "validation_regex": null
+          }
+        },
+        "_llm_metadata": {
+          "input_tokens": 5689,
+          "output_tokens": 403,
+          "model": "claude-3-haiku-20240307",
+          "provider": "anthropic"
+        }
+      },
+      "extraction": {
+        "extracted_at": "2025-11-27T19:49:58.708451Z",
+        "files_analyzed": [
+          "README.md",
+          "pyproject.toml"
+        ],
+        "status": "needs_review",
+        "score": -1.0,
+        "confidence": 0.5,
+        "issues": [
+          "Validation failed: '\\n  \"name\"'"
+        ],
+        "warnings": [
+          "Needs manual review"
+        ]
+      }
+    },
+    {
+      "github_url": "https://github.com/GLips/Figma-Context-MCP",
+      "github_metadata": {
+        "name": "Figma-Context-MCP",
+        "full_name": "GLips/Figma-Context-MCP",
+        "description": "MCP server to provide Figma layout information to AI coding agents like Cursor",
+        "language": "TypeScript",
+        "topics": [
+          "ai",
+          "cursor",
+          "figma",
+          "mcp",
+          "typescript"
+        ],
+        "stars": 11943,
+        "forks": 971,
+        "homepage": "https://www.framelink.ai/",
+        "default_branch": "main",
+        "created_at": "2025-02-13T02:55:06+00:00",
+        "updated_at": "2025-11-26T18:02:11+00:00"
+      },
+      "config": {
+        "name": "Framelink MCP for Figma",
+        "install": null,
+        "command": "npx",
+        "args": [
+          "-y",
+          "figma-developer-mcp",
+          "--figma-api-key=${FIGMA_API_KEY}",
+          "--stdio"
+        ],
+        "env": {
+          "FIGMA_API_KEY": {
+            "required": true,
+            "description": "Your Figma API access token",
+            "default": null,
+            "example": "your_figma_api_key_here",
+            "where_to_get": "https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens",
+            "validation_regex": null
+          },
+          "FIGMA_FILE_KEY": {
+            "required": false,
+            "description": "Figma file key for testing",
+            "default": null,
+            "example": "your_figma_file_key_here",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "FIGMA_NODE_ID": {
+            "required": false,
+            "description": "Figma node ID for Testing",
+            "default": null,
+            "example": "your_figma_node_id_here",
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "PORT": {
+            "required": false,
+            "description": "Server configuration",
+            "default": "3333",
+            "example": null,
+            "where_to_get": null,
+            "validation_regex": null
+          },
+          "OUTPUT_FORMAT": {
+            "required": false,
+            "description": "Output format can either be \"yaml\" or \"json\"",
+            "default": "yaml",
+            "example": "json",
+            "where_to_get": null,
+            "validation_regex": null
+          }
+        },
+        "_llm_metadata": {
+          "input_tokens": 5658,
+          "output_tokens": 747,
+          "model": "claude-3-haiku-20240307",
+          "provider": "anthropic"
+        }
+      },
+      "extraction": {
+        "extracted_at": "2025-11-27T19:50:04.135185Z",
+        "files_analyzed": [
+          "README.md",
+          "package.json",
+          ".env.example"
+        ],
+        "status": "needs_review",
+        "score": -1.0,
+        "confidence": 0.5,
+        "issues": [
+          "Validation failed: '\\n  \"name\"'"
+        ],
+        "warnings": [
+          "Needs manual review"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,495 @@
+Tu analyses un serveur MCP hébergé sur GitHub pour extraire sa configuration de démarrage.
+
+# MÉTADONNÉES DU REPOSITORY
+Nom: Figma-Context-MCP
+Description: MCP server to provide Figma layout information to AI coding agents like Cursor
+Topics: ai, cursor, figma, mcp, typescript
+Langage principal: TypeScript
+Homepage: https://www.framelink.ai/
+
+# FICHIERS DISPONIBLES
+
+Note : Tu recevras entre 3 et 6 fichiers selon leur disponibilité dans le repo.
+Les fichiers ci-dessous sont ceux qui ont été récupérés avec succès.
+
+
+## README.md
+```
+<a href="https://www.framelink.ai/?utm_source=github&utm_medium=referral&utm_campaign=readme" target="_blank" rel="noopener">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.framelink.ai/github/HeaderDark.png" />
+    <img alt="Framelink" src="https://www.framelink.ai/github/HeaderLight.png" />
+  </picture>
+</a>
+
+<div align="center">
+  <h1>Framelink MCP for Figma</h1>
+  <p>
+    🌐 Available in:
+    <a href="README.ko.md">한국어 (Korean)</a> |
+    <a href="README.ja.md">日本語 (Japanese)</a> |
+    <a href="README.zh-cn.md">简体中文 (Simplified Chinese)</a> |
+    <a href="README.zh-tw.md">繁體中文 (Traditional Chinese)</a>
+  </p>
+  <h3>Give your coding agent access to your Figma data.<br/>Implement designs in any framework in one-shot.</h3>
+  <a href="https://npmcharts.com/compare/figma-developer-mcp?interval=30">
+    <img alt="weekly downloads" src="https://img.shields.io/npm/dm/figma-developer-mcp.svg">
+  </a>
+  <a href="https://github.com/GLips/Figma-Context-MCP/blob/main/LICENSE">
+    <img alt="MIT License" src="https://img.shields.io/github/license/GLips/Figma-Context-MCP" />
+  </a>
+  <a href="https://framelink.ai/discord">
+    <img alt="Discord" src="https://img.shields.io/discord/1352337336913887343?color=7389D8&label&logo=discord&logoColor=ffffff" />
+  </a>
+  <br />
+  <a href="https://twitter.com/glipsman">
+    <img alt="Twitter" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fglipsman&label=%40glipsman" />
+  </a>
+</div>
+
+<br/>
+
+Give [Cursor](https://cursor.sh/) and other AI-powered coding tools access to your Figma files with this [Model Context Protocol](https://modelcontextprotocol.io/introduction) server.
+
+When Cursor has access to Figma design data, it's **way** better at one-shotting designs accurately than alternative approaches like pasting screenshots.
+
+<h3><a href="https://www.framelink.ai/docs/quickstart?utm_source=github&utm_medium=referral&utm_campaign=readme">See quickstart instructions →</a></h3>
+
+## Demo
+
+[Watch a demo of building a UI in Cursor with Figma design data](https://youtu.be/6G9yb-LrEqg)
+
+[![Watch the video](https://img.youtube.com/vi/6G9yb-LrEqg/maxresdefault.jpg)](https://youtu.be/6G9yb-LrEqg)
+
+## How it works
+
+1. Open your IDE's chat (e.g. agent mode in Cursor).
+2. Paste a link to a Figma file, frame, or group.
+3. Ask Cursor to do something with the Figma file—e.g. implement the design.
+4. Cursor will fetch the relevant metadata from Figma and use it to write your code.
+
+This MCP server is specifically designed for use with Cursor. Before responding with context from the [Figma API](https://www.figma.com/developers/api), it simplifies and translates the response so only the most relevant layout and styling information is provided to the model.
+
+Reducing the amount of context provided to the model helps make the AI more accurate and the responses more relevant.
+
+## Getting Started
+
+Many code editors and other AI clients use a configuration file to manage MCP servers.
+
+The `figma-developer-mcp` server can be configured by adding the following to your configuration file.
+
+> NOTE: You will need to create a Figma access token to use this server. Instructions on how to create a Figma API access token can be found [here](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens).
+
+### MacOS / Linux
+
+```json
+{
+  "mcpServers": {
+    "Framelink MCP for Figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+    }
+  }
+}
+```
+
+### Windows
+
+```json
+{
+  "mcpServers": {
+    "Framelink MCP for Figma": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
+    }
+  }
+}
+```
+
+Or you can set `FIGMA_API_KEY` and `PORT` in the `env` field.
+
+If you need more information on how to configure the Framelink MCP for Figma, see the [Framelink docs](https://www.framelink.ai/docs/quickstart?utm_source=github&utm_medium=referral&utm_campaign=readme).
+
+## Star History
+
+<a href="https://star-history.com/#GLips/Figma-Context-MCP"><img src="https://api.star-history.com/svg?repos=GLips/Figma-Context-MCP&type=Date" alt="Star History Chart" width="600" /></a>
+
+## Learn More
+
+The Framelink MCP for Figma is simple but powerful. Get the most out of it by learning more at the [Framelink](https://framelink.ai?utm_source=github&utm_medium=referral&utm_campaign=readme) site.
+
+```
+
+## package.json
+```
+{
+  "name": "figma-developer-mcp",
+  "version": "0.6.4",
+  "mcpName": "io.github.GLips/Figma-Context-MCP",
+  "description": "Give your coding agent access to your Figma data. Implement designs in any framework in one-shot.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "figma-developer-mcp": "dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup --dts",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "start": "node dist/bin.js",
+    "start:cli": "cross-env NODE_ENV=cli node dist/bin.js",
+    "start:http": "node dist/bin.js",
+    "dev": "cross-env NODE_ENV=development tsup --watch",
+    "dev:cli": "cross-env NODE_ENV=development tsup --watch -- --stdio",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "inspect": "pnpx @modelcontextprotocol/inspector",
+    "prepack": "pnpm build",
+    "changeset": "changeset add",
+    "version": "changeset version && git add -A",
+    "beta:start": "changeset pre enter beta",
+    "beta:end": "changeset pre exit",
+    "beta:version": "changeset version && pnpm install --lockfile-only",
+    "beta:publish": "changeset publish",
+    "prerelease": "pnpm build",
+    "release": "changeset publish && git push --follow-tags",
+    "pub:release": "pnpm build && npm publish",
+    "pub:release:beta": "pnpm build && npm publish --tag beta"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.10.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GLips/Figma-Context-MCP.git"
+  },
+  "homepage": "https://www.framelink.ai",
+  "keywords": [
+    "figma",
+    "mcp",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@figma/rest-api-spec": "^0.33.0",
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@types/yargs": "^17.0.33",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "js-yaml": "^4.1.0",
+    "remeda": "^2.20.1",
+    "sharp": "^0.34.3",
+    "yargs": "^17.7.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.2",
+    "@eslint/js": "^9.33.0",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.17.0",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.0",
+    "ts-jest": "^29.2.5",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
+
+```
+
+## .env.example
+```
+# Your Figma API access token
+# Get it from your Figma account settings: https://www.figma.com/developers/api#access-tokens
+FIGMA_API_KEY=your_figma_api_key_here
+
+# Figma file key for testing
+# This is the ID in your Figma URL: https://www.figma.com/file/{FILE_KEY}/filename
+FIGMA_FILE_KEY=your_figma_file_key_here
+
+# Figma node ID for Testing
+# This is the node-id parameter in your Figma URL: ?node-id={NODE_ID}
+FIGMA_NODE_ID=your_figma_node_id_here
+
+# Server configuration
+PORT=3333
+
+# Output format can either be "yaml" or "json". Is YAML by default since it's
+# smaller, but JSON is understood by most LLMs better.
+#
+# OUTPUT_FORMAT="json"
+```
+
+
+---
+
+# OBJECTIF
+Extraire la configuration de démarrage du serveur MCP dans un format JSON structuré.
+
+# FORMAT DE SORTIE ATTENDU
+{
+  "name": "nom-du-serveur",
+  "install": "commande d'installation complète" ou null,
+  "command": "commande de démarrage",
+  "args": ["arg1", "arg2"],
+  "env": {
+    "VAR_NAME": {
+      "required": true ou false,
+      "description": "description claire",
+      "default": "valeur par défaut" ou null,
+      "example": "exemple de valeur",
+      "where_to_get": "URL où obtenir la clé" ou null,
+      "validation_regex": "regex de validation" ou null
+    }
+  }
+}
+
+# RÈGLES D'EXTRACTION
+
+## 1. Détermination du Type d'Installation
+
+Analyse dans cet ordre :
+
+**Docker** :
+- Si Dockerfile ou docker-compose.yml existe
+- Si README mentionne "docker run" ou "docker-compose"
+- Format : command="docker", args=["run", "--rm", "-i", "image:tag"]
+
+**NPM/NPX** :
+- Si package.json existe
+- Si package.json contient un champ "bin"
+- Si le package est dans l'organisation @modelcontextprotocol
+- Format NPX : command="npx", args=["-y", "@org/package"]
+- Format NPM : install="npm install -g package", command="package-name"
+
+**Python/Pip** :
+- Si pyproject.toml ou requirements.txt existe
+- Si pyproject.toml contient [project.scripts]
+- Format : install="pip install package", command="python", args=["-m", "package_name"]
+
+**UV (Python moderne)** :
+- Si README mentionne "uvx" ou "uv pip"
+- Format : install="uv pip install package", command="uvx", args=["package"]
+
+**Cargo (Rust)** :
+- Si Cargo.toml existe
+- Format : install="cargo install package", command="package-name"
+
+**Go** :
+- Si go.mod existe
+- Format : install="go install github.com/user/repo@latest", command="repo"
+
+**Build from Source** :
+- Si aucune méthode packagée n'existe
+- Extraire les étapes de build du README
+- Format : install="git clone && cd && build steps", command="./binary ou node dist/index.js"
+
+## 2. Hiérarchie de Priorité pour les Sources
+
+**Ordre de confiance (du plus fiable au moins fiable)** :
+
+1. **Dockerfile CMD/ENTRYPOINT** → Vérité absolue
+   - La commande exacte qui lance le serveur en production
+   - Les ENV définissent les variables obligatoires
+
+2. **docker-compose.yml** → Très fiable
+   - Section "command" révèle la vraie commande
+   - Section "environment" liste toutes les variables
+
+3. **package.json (Node.js)** → Structure exacte
+   - Champ "bin" → nom de la commande installée
+   - Scripts "start" → comment lancer
+   - Si @modelcontextprotocol/* → toujours utiliser npx -y
+
+4. **pyproject.toml (Python)** → Entry point exact
+   - [project.scripts] → nom de la commande
+   - [tool.poetry.scripts] → idem pour Poetry
+
+5. **.env.example** → Variables d'environnement réelles
+   - Liste exhaustive des variables
+   - Exemples de valeurs
+   - Commentaires explicatifs
+
+6. **README.md** → Contexte général
+   - Instructions d'installation
+   - Exemples d'utilisation
+   - Mais souvent incomplet ou obsolète
+
+## 3. Règles Spécifiques par Type
+
+### NPX/NPM
+- Si le package est @modelcontextprotocol/*, toujours : `command="npx", args=["-y", "package-name"]`
+- Ne pas ajouter d'install pour NPX (null)
+- Args supplémentaires depuis README (ex: chemins, --port, etc.)
+
+### Docker
+- args doit TOUJOURS commencer par : ["run", "--rm", "-i"]
+- `--rm` : supprime le container après arrêt
+- `-i` : mode interactif pour stdio
+- NE PAS inclure `-e VAR=value` dans args (MCP Hub l'injectera automatiquement)
+- Juste mettre le nom de l'image en dernier arg
+
+### Python
+- Si [project.scripts] existe, utiliser ce nom exactement
+- Convertir dashes en underscores pour module name (ex: mcp-server → mcp_server)
+- Si UV détecté : command="uvx" est plus moderne que python -m
+
+### Variables d'Environnement
+- `required=true` UNIQUEMENT si le serveur crash au démarrage sans cette variable
+- `required=false` pour variables optionnelles avec comportement par défaut
+- Extraire description depuis commentaires dans .env.example
+- `where_to_get` : URL vers documentation d'API externe (ex: https://platform.openai.com/api-keys)
+
+## 4. Gestion des Cas Ambigus
+
+Si plusieurs méthodes d'installation existent (ex: NPM + Docker) :
+- Choisir la plus simple : NPX > Docker > Pip > Build
+- Mentionner l'alternative dans un champ "notes" si nécessaire
+
+Si information manquante ou contradictoire :
+- Ajouter un champ `"confidence": 0.0-1.0` au JSON
+- Ajouter un champ `"warnings": ["warning1", "warning2"]`
+- Si vraiment impossible : `{"error": "raison", "requires_manual_review": true}`
+
+## 5. Cas Spéciaux
+
+**SSE/WebSocket (serveurs HTTP)** :
+- Si le serveur expose un endpoint HTTP (/sse ou websocket)
+- Ajouter `"transport": "sse"` ou `"transport": "websocket"`
+- La commande doit démarrer un serveur web
+- Exemple : command="node", args=["server.js", "--port", "3000"]
+
+**Arguments dynamiques** :
+- Utiliser ${VAR_NAME} dans args pour indiquer injection de variable
+- Exemple : args=["--api-key", "${API_KEY}"]
+
+# EXEMPLES DE SORTIES ATTENDUES
+
+## Exemple 1 : Serveur NPX simple
+{
+  "name": "filesystem",
+  "install": null,
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
+  "env": {}
+}
+
+## Exemple 2 : Serveur Docker avec env vars
+{
+  "name": "postgres-mcp",
+  "install": "docker pull mcp/postgres:latest",
+  "command": "docker",
+  "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
+  "env": {
+    "DATABASE_URL": {
+      "required": true,
+      "description": "PostgreSQL connection string",
+      "default": null,
+      "example": "postgresql://user:pass@localhost:5432/db",
+      "where_to_get": null,
+      "validation_regex": "^postgresql://.+$"
+    }
+  }
+}
+
+## Exemple 3 : Python avec plusieurs env vars
+{
+  "name": "slack-server",
+  "install": "pip install mcp-server-slack",
+  "command": "python",
+  "args": ["-m", "mcp_server_slack"],
+  "env": {
+    "SLACK_BOT_TOKEN": {
+      "required": true,
+      "description": "Slack Bot User OAuth Token",
+      "default": null,
+      "example": "xoxb-xxx...",
+      "where_to_get": "https://api.slack.com/apps"
+    },
+    "SLACK_TEAM_ID": {
+      "required": true,
+      "description": "Slack workspace ID",
+      "default": null,
+      "example": "T01234567"
+    },
+    "LOG_LEVEL": {
+      "required": false,
+      "description": "Logging verbosity",
+      "default": "INFO",
+      "example": "DEBUG"
+    }
+  }
+}
+
+## Exemple 4 : Build from source
+{
+  "name": "custom-server",
+  "install": "git clone https://github.com/user/server && cd server && npm install && npm run build",
+  "command": "node",
+  "args": ["dist/index.js"],
+  "env": {
+    "API_KEY": {
+      "required": true,
+      "description": "API key for service",
+      "default": null,
+      "example": "sk-xxx..."
+    }
+  }
+}
+
+## Exemple 5 : Extraction incertaine
+{
+  "name": "unclear-server",
+  "install": "npm install -g unclear-server",
+  "command": "unclear-server",
+  "args": [],
+  "env": {},
+  "confidence": 0.6,
+  "warnings": [
+    "README doesn't specify env vars clearly",
+    "No .env.example file found",
+    "Installation steps might be incomplete"
+  ]
+}
+
+## Exemple 6 : Échec d'extraction
+{
+  "error": "Unable to determine installation method - no package manager files found",
+  "requires_manual_review": true,
+  "partial_info": {
+    "name": "unknown-server",
+    "suspected_language": "python"
+  }
+}
+
+# VALIDATION FINALE
+
+Avant de retourner le JSON, vérifie :
+- [ ] Tous les champs requis sont présents (name, command, args, env)
+- [ ] command est une commande valide (npx, python, docker, node, uvx, etc.)
+- [ ] args est un array (peut être vide)
+- [ ] env est un object (peut être vide)
+- [ ] Chaque env var a au minimum : required, description, example
+- [ ] Si install présent, c'est une commande shell valide
+- [ ] Pas de caractères spéciaux non échappés dans les strings
+- [ ] Le JSON est valide et parseable
+
+# FORMAT DE RÉPONSE
+
+RETOURNE UNIQUEMENT LE JSON, AUCUN TEXTE AVANT OU APRÈS.
+PAS DE MARKDOWN, PAS DE BACKTICKS, JUSTE LE JSON RAW.

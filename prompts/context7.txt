@@ -1,0 +1,839 @@
+Tu analyses un serveur MCP hébergé sur GitHub pour extraire sa configuration de démarrage.
+
+# MÉTADONNÉES DU REPOSITORY
+Nom: context7
+Description: Context7 MCP Server -- Up-to-date code documentation for LLMs and AI code editors
+Topics: llm, mcp, mcp-server, vibe-coding
+Langage principal: JavaScript
+Homepage: https://context7.com
+
+# FICHIERS DISPONIBLES
+
+Note : Tu recevras entre 3 et 6 fichiers selon leur disponibilité dans le repo.
+Les fichiers ci-dessous sont ceux qui ont été récupérés avec succès.
+
+
+## README.md
+```
+![Cover](public/cover.png)
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=context7&config=eyJ1cmwiOiJodHRwczovL21jcC5jb250ZXh0Ny5jb20vbWNwIn0%3D) [<img alt="Install in VS Code (npx)" src="https://img.shields.io/badge/Install%20in%20VS%20Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22context7%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40upstash%2Fcontext7-mcp%40latest%22%5D%7D)
+
+# Context7 MCP - Up-to-date Code Docs For Any Prompt
+
+[![Website](https://img.shields.io/badge/Website-context7.com-blue)](https://context7.com) [![smithery badge](https://smithery.ai/badge/@upstash/context7-mcp)](https://smithery.ai/server/@upstash/context7-mcp) [![NPM Version](https://img.shields.io/npm/v/%40upstash%2Fcontext7-mcp?color=red)](https://www.npmjs.com/package/@upstash/context7-mcp) [![MIT licensed](https://img.shields.io/npm/l/%40upstash%2Fcontext7-mcp)](./LICENSE)
+
+[![繁體中文](https://img.shields.io/badge/docs-繁體中文-yellow)](./i18n/README.zh-TW.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./i18n/README.zh-CN.md) [![日本語](https://img.shields.io/badge/docs-日本語-b7003a)](./i18n/README.ja.md) [![한국어 문서](https://img.shields.io/badge/docs-한국어-green)](./i18n/README.ko.md) [![Documentación en Español](https://img.shields.io/badge/docs-Español-orange)](./i18n/README.es.md) [![Documentation en Français](https://img.shields.io/badge/docs-Français-blue)](./i18n/README.fr.md) [![Documentação em Português (Brasil)](<https://img.shields.io/badge/docs-Português%20(Brasil)-purple>)](./i18n/README.pt-BR.md) [![Documentazione in italiano](https://img.shields.io/badge/docs-Italian-red)](./i18n/README.it.md) [![Dokumentasi Bahasa Indonesia](https://img.shields.io/badge/docs-Bahasa%20Indonesia-pink)](./i18n/README.id-ID.md) [![Dokumentation auf Deutsch](https://img.shields.io/badge/docs-Deutsch-darkgreen)](./i18n/README.de.md) [![Документация на русском языке](https://img.shields.io/badge/docs-Русский-darkblue)](./i18n/README.ru.md) [![Українська документація](https://img.shields.io/badge/docs-Українська-lightblue)](./i18n/README.uk.md) [![Türkçe Doküman](https://img.shields.io/badge/docs-Türkçe-blue)](./i18n/README.tr.md) [![Arabic Documentation](https://img.shields.io/badge/docs-Arabic-white)](./i18n/README.ar.md) [![Tiếng Việt](https://img.shields.io/badge/docs-Tiếng%20Việt-red)](./i18n/README.vi.md)
+
+## ❌ Without Context7
+
+LLMs rely on outdated or generic information about the libraries you use. You get:
+
+- ❌ Code examples are outdated and based on year-old training data
+- ❌ Hallucinated APIs that don't even exist
+- ❌ Generic answers for old package versions
+
+## ✅ With Context7
+
+Context7 MCP pulls up-to-date, version-specific documentation and code examples straight from the source — and places them directly into your prompt.
+
+Add `use context7` to your prompt (or [set up a rule](#️-installation) to auto-invoke):
+
+```txt
+Create a Next.js middleware that checks for a valid JWT in cookies
+and redirects unauthenticated users to `/login`. use context7
+```
+
+```txt
+Configure a Cloudflare Worker script to cache
+JSON API responses for five minutes. use context7
+```
+
+Context7 fetches up-to-date code examples and documentation right into your LLM's context.
+
+- 1️⃣ Write your prompt naturally
+- 2️⃣ Tell the LLM to `use context7` (or [set up a rule](#️-installation) once)
+- 3️⃣ Get working code answers
+
+No tab-switching, no hallucinated APIs that don't exist, no outdated code generation.
+
+> [!NOTE]
+> This repository hosts the source code of Context7 MCP server. The supporting components — API backend, parsing engine, and crawling engine — are private and not part of this release.
+
+## 📚 Adding Projects
+
+Check out our [project addition guide](https://context7.com/docs/adding-libraries) to learn how to add (or update) your favorite libraries to Context7.
+
+## 🛠️ Installation
+
+### Requirements
+
+- Node.js >= v18.0.0
+- Cursor, Claude Code, VSCode, Windsurf or another MCP Client
+- Context7 API Key (Optional) for higher rate limits and private repositories (Get yours by creating an account at [context7.com/dashboard](https://context7.com/dashboard))
+
+> [!TIP]
+> **Recommended Post-Setup: Add a Rule to Auto-Invoke Context7**
+>
+> After installing Context7 (see instructions below), enhance your workflow by adding a rule so you don't have to type `use context7` in every prompt. Define a simple rule in your MCP client's rule section to automatically invoke Context7 on any code question:
+>
+> - For Windsurf, in `.windsurfrules` file
+> - For Cursor, from `Cursor Settings > Rules` section
+> - For Claude Code, in `CLAUDE.md` file
+> - Or the equivalent in your MCP client
+>
+> **Example Rule:**
+>
+> ```txt
+> Always use context7 when I need code generation, setup or configuration steps, or
+> library/API documentation. This means you should automatically use the Context7 MCP
+> tools to resolve library id and get library docs without me having to explicitly ask.
+> ```
+>
+> From then on, you'll get Context7's docs in any related conversation without typing anything extra. You can alter the rule to match your use cases.
+
+<details>
+<summary><b>Installing via Smithery</b></summary>
+
+To install Context7 MCP Server for any client automatically via [Smithery](https://smithery.ai/server/@upstash/context7-mcp):
+
+```bash
+npx -y @smithery/cli@latest install @upstash/context7-mcp --client <CLIENT_NAME> --key <YOUR_SMITHERY_KEY>
+```
+
+You can find your Smithery key in the [Smithery.ai webpage](https://smithery.ai/server/@upstash/context7-mcp).
+
+</details>
+
+<details>
+<summary><b>Install in Cursor</b></summary>
+
+Go to: `Settings` -> `Cursor Settings` -> `MCP` -> `Add new global MCP server`
+
+Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file is the recommended approach. You may also install in a specific project by creating `.cursor/mcp.json` in your project folder. See [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more info.
+
+> Since Cursor 1.0, you can click the install button below for instant one-click installation.
+
+#### Cursor Remote Server Connection
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=context7&config=eyJ1cmwiOiJodHRwczovL21jcC5jb250ZXh0Ny5jb20vbWNwIn0%3D)
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+#### Cursor Local Server Connection
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=context7&config=eyJjb21tYW5kIjoibnB4IC15IEB1cHN0YXNoL2NvbnRleHQ3LW1jcCJ9)
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Install in Claude Code</b></summary>
+
+Run this command. See [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for more info.
+
+#### Claude Code Remote Server Connection
+
+```sh
+claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
+```
+
+#### Claude Code Local Server Connection
+
+```sh
+claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key YOUR_API_KEY
+```
+
+</details>
+
+<details>
+<summary><b>Install in Amp</b></summary>
+
+Run this command in your terminal. See [Amp MCP docs](https://ampcode.com/manual#mcp) for more info.
+
+#### Without API Key (Basic Usage)
+
+```sh
+amp mcp add context7 https://mcp.context7.com/mcp
+```
+
+#### With API Key (Higher Rate Limits & Private Repos)
+
+```sh
+amp mcp add context7 --header "CONTEXT7_API_KEY=YOUR_API_KEY" https://mcp.context7.com/mcp
+```
+
+</details>
+
+<details>
+<summary><b>Install in Windsurf</b></summary>
+
+Add this to your Windsurf MCP config file. See [Windsurf MCP docs](https://docs.windsurf.com/windsurf/cascade/mcp) for more info.
+
+#### Windsurf Remote Server Connection
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "serverUrl": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+#### Windsurf Local Server Connection
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Install in VS Code</b></summary>
+
+[<img alt="Install in VS Code (npx)" src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Context7%20MCP&color=0098FF">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%7B%22name%22%3A%22context7%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40upstash%2Fcontext7-mcp%40latest%22%5D%7D)
+[<img alt="Install in VS Code Insiders (npx)" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Context7%20MCP&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%7B%22name%22%3A%22context7%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40upstash%2Fcontext7-mcp%40latest%22%5D%7D)
+
+Add this to your VS Code MCP config file. See [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) for more info.
+
+#### VS Code Remote Server Connection
+
+```json
+"mcp": {
+  "servers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+#### VS Code Local Server Connection
+
+```json
+"mcp": {
+  "servers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>
+<b>Install in Cline</b>
+</summary>
+
+You can easily install Context7 through the [Cline MCP Server Marketplace](https://cline.bot/mcp-marketplace) by following these instructions:
+
+1. Open **Cline**.
+2. Click the hamburger menu icon (☰) to enter the **MCP Servers** section.
+3. Use the search bar within the **Marketplace** tab to find _Context7_.
+4. Click the **Install** button.
+
+Or you can directly edit MCP servers configuration:
+
+1. Open **Cline**.
+2. Click the hamburger menu icon (☰) to enter the **MCP Servers** section.
+3. Choose **Remote Servers** tab.
+4. Click the **Edit Configuration** button.
+5. Add context7 to `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "type": "streamableHttp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Install in Zed</b></summary>
+
+It can be installed via [Zed Extensions](https://zed.dev/extensions?query=Context7) or you can add this to your Zed `settings.json`. See [Zed Context Server docs](https://zed.dev/docs/assistant/context-servers) for more info.
+
+```json
+{
+  "context_servers": {
+    "Context7": {
+      "source": "custom",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Install in Augment Code</b></summary>
+
+To configure Context7 MCP in Augment Code, you can use either the graphical interface or manual configuration.
+
+### **A. Using the Augment Code UI**
+
+1. Click the hamburger menu.
+2. Select **Settings**.
+3. Navigate to the **Tools** section.
+4. Click the **+ Add MCP** button.
+5. Enter the following command:
+
+   ```
+   npx -y @upstash/context7-mcp@latest
+   ```
+
+6. Name the MCP: **Context7**.
+7. Click the **Add** button.
+
+Once the MCP server is added, you can start using Context7's up-to-date code documentation features directly within Augment Code.
+
+---
+
+### **B. Manual Configuration**
+
+1. Press Cmd/Ctrl Shift P or go to the hamburger menu in the Augment panel
+2. Select Edit Settings
+3. Under Advanced, click Edit in settings.json
+4. Add the server configuration to the `mcpServers` array in the `augment.advanced` object
+
+```json
+"augment.advanced": {
+  "mcpServers": [
+    {
+      "name": "context7",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  ]
+}
+```
+
+Once the MCP server is added, restart your editor. If you receive any errors, check the syntax to make sure closing brackets or commas are not missing.
+
+</details>
+
+<details>
+<summary><b>Install in Kilo Code</b></summary>
+
+You can configure the Context7 MCP server in **Kilo Code** using either the UI or by editing your project's MCP configuration file.
+
+Kilo Code supports two configuration levels:
+
+- **Global MCP Configuration** — stored in `mcp_settings.json`
+- **Project-level MCP Configuration** — stored in `.kilocode/mcp.json` (recommended)
+
+If a server is defined in both places, the **project-level configuration overrides the global one**.
+
+---
+
+## Configure via Kilo Code UI
+
+1. Open **Kilo Code**.
+2. Click the **Settings** icon in the top-right corner.
+3. Navigate to **Settings → MCP Servers**.
+4. Click **Add Server**.
+5. Choose **HTTP Server** (Streamable HTTP Transport).
+6. Enter the details:
+
+**URL**
+`https://mcp.context7.com/mcp`
+
+**Headers → Add Header**
+
+- **Key:** `Authorization`
+- **Value:** `Bearer YOUR_API_KEY`
+
+7. Click **Save**.
+8. Ensure the server toggle is **enabled**.
+9. If needed, click **Refresh MCP Servers** to reload the configuration.
+
+---
+
+## Manual Configuration (`.kilocode/mcp.json`)
+
+To configure the server at the project level (recommended for team environments), create the following file:
+
+**`.kilocode/mcp.json`:**
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "type": "streamable-http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      },
+      "alwaysAllow": [],
+      "disabled": false
+    }
+  }
+}
+```
+
+Replace YOUR_API_KEY with your actual Context7 API key.
+
+After saving the file:
+
+- Open Settings → MCP Servers
+
+- Click Refresh MCP Servers
+
+Kilo Code will automatically detect and load the configuration.
+
+</details>
+
+<details>
+<summary><b>Install in Google Antigravity</b></summary>
+
+Add this to your Antigravity MCP config file. See [Antigravity MCP docs](https://antigravity.google/docs/mcp) for more info.
+
+#### Google Antigravity Remote Server Connection
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "serverUrl": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+#### Google Antigravity Local Server Connection
+
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Install in Roo Code</b></summary>
+
+Add this 
+
+[... truncated ...]
+```
+
+## package.json
+```
+{
+  "name": "@upstash/context7-mcp",
+  "version": "1.0.0",
+  "mcpName": "io.github.upstash/context7",
+  "description": "MCP server for Context7",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && chmod 755 dist/index.js",
+    "format": "prettier --write .",
+    "lint": "eslint \"**/*.{js,ts,tsx}\" --fix",
+    "lint:check": "eslint \"**/*.{js,ts,tsx}\"",
+    "start": "node dist/index.js --transport http",
+    "pack-mcpb": "bun install && bun run build && rm -rf node_modules && bun install --production && mv mcpb/.mcpbignore .mcpbignore && mv mcpb/manifest.json manifest.json && mv public/icon.png icon.png && mcpb validate manifest.json && mcpb pack . mcpb/context7.mcpb && mv manifest.json mcpb/manifest.json && mv .mcpbignore mcpb/.mcpbignore && mv icon.png public/icon.png && bun install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upstash/context7.git"
+  },
+  "keywords": [
+    "modelcontextprotocol",
+    "mcp",
+    "context7",
+    "vibe-coding",
+    "developer tools",
+    "documentation",
+    "context"
+  ],
+  "author": "abdush",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "context7-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/upstash/context7/issues"
+  },
+  "homepage": "https://github.com/upstash/context7#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "@types/express": "^5.0.4",
+    "commander": "^14.0.0",
+    "express": "^5.1.0",
+    "undici": "^6.6.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.28.0"
+  }
+}
+
+```
+
+## Dockerfile
+```
+# Generated by https://smithery.ai. See: https://smithery.ai/docs/config#dockerfile
+# ----- Build Stage -----
+FROM node:lts-alpine AS builder
+WORKDIR /app
+
+# Copy package and configuration
+COPY package.json bun.lock tsconfig.json ./
+
+# Copy source code
+COPY src ./src
+
+# Install dependencies and build
+RUN npm install && npm run build
+
+# ----- Production Stage -----
+FROM node:lts-alpine
+WORKDIR /app
+
+# Copy built artifacts
+COPY --from=builder /app/dist ./dist
+
+# Copy package.json for production install
+COPY package.json ./
+
+# Install only production dependencies
+RUN npm install --production --ignore-scripts
+
+# Expose HTTP port
+EXPOSE 8080
+
+# Default command using CLI flags
+CMD ["node", "dist/index.js", "--transport", "http", "--port", "8080"]
+
+```
+
+
+---
+
+# OBJECTIF
+Extraire la configuration de démarrage du serveur MCP dans un format JSON structuré.
+
+# FORMAT DE SORTIE ATTENDU
+{
+  "name": "nom-du-serveur",
+  "install": "commande d'installation complète" ou null,
+  "command": "commande de démarrage",
+  "args": ["arg1", "arg2"],
+  "env": {
+    "VAR_NAME": {
+      "required": true ou false,
+      "description": "description claire",
+      "default": "valeur par défaut" ou null,
+      "example": "exemple de valeur",
+      "where_to_get": "URL où obtenir la clé" ou null,
+      "validation_regex": "regex de validation" ou null
+    }
+  }
+}
+
+# RÈGLES D'EXTRACTION
+
+## 1. Détermination du Type d'Installation
+
+Analyse dans cet ordre :
+
+**Docker** :
+- Si Dockerfile ou docker-compose.yml existe
+- Si README mentionne "docker run" ou "docker-compose"
+- Format : command="docker", args=["run", "--rm", "-i", "image:tag"]
+
+**NPM/NPX** :
+- Si package.json existe
+- Si package.json contient un champ "bin"
+- Si le package est dans l'organisation @modelcontextprotocol
+- Format NPX : command="npx", args=["-y", "@org/package"]
+- Format NPM : install="npm install -g package", command="package-name"
+
+**Python/Pip** :
+- Si pyproject.toml ou requirements.txt existe
+- Si pyproject.toml contient [project.scripts]
+- Format : install="pip install package", command="python", args=["-m", "package_name"]
+
+**UV (Python moderne)** :
+- Si README mentionne "uvx" ou "uv pip"
+- Format : install="uv pip install package", command="uvx", args=["package"]
+
+**Cargo (Rust)** :
+- Si Cargo.toml existe
+- Format : install="cargo install package", command="package-name"
+
+**Go** :
+- Si go.mod existe
+- Format : install="go install github.com/user/repo@latest", command="repo"
+
+**Build from Source** :
+- Si aucune méthode packagée n'existe
+- Extraire les étapes de build du README
+- Format : install="git clone && cd && build steps", command="./binary ou node dist/index.js"
+
+## 2. Hiérarchie de Priorité pour les Sources
+
+**Ordre de confiance (du plus fiable au moins fiable)** :
+
+1. **Dockerfile CMD/ENTRYPOINT** → Vérité absolue
+   - La commande exacte qui lance le serveur en production
+   - Les ENV définissent les variables obligatoires
+
+2. **docker-compose.yml** → Très fiable
+   - Section "command" révèle la vraie commande
+   - Section "environment" liste toutes les variables
+
+3. **package.json (Node.js)** → Structure exacte
+   - Champ "bin" → nom de la commande installée
+   - Scripts "start" → comment lancer
+   - Si @modelcontextprotocol/* → toujours utiliser npx -y
+
+4. **pyproject.toml (Python)** → Entry point exact
+   - [project.scripts] → nom de la commande
+   - [tool.poetry.scripts] → idem pour Poetry
+
+5. **.env.example** → Variables d'environnement réelles
+   - Liste exhaustive des variables
+   - Exemples de valeurs
+   - Commentaires explicatifs
+
+6. **README.md** → Contexte général
+   - Instructions d'installation
+   - Exemples d'utilisation
+   - Mais souvent incomplet ou obsolète
+
+## 3. Règles Spécifiques par Type
+
+### NPX/NPM
+- Si le package est @modelcontextprotocol/*, toujours : `command="npx", args=["-y", "package-name"]`
+- Ne pas ajouter d'install pour NPX (null)
+- Args supplémentaires depuis README (ex: chemins, --port, etc.)
+
+### Docker
+- args doit TOUJOURS commencer par : ["run", "--rm", "-i"]
+- `--rm` : supprime le container après arrêt
+- `-i` : mode interactif pour stdio
+- NE PAS inclure `-e VAR=value` dans args (MCP Hub l'injectera automatiquement)
+- Juste mettre le nom de l'image en dernier arg
+
+### Python
+- Si [project.scripts] existe, utiliser ce nom exactement
+- Convertir dashes en underscores pour module name (ex: mcp-server → mcp_server)
+- Si UV détecté : command="uvx" est plus moderne que python -m
+
+### Variables d'Environnement
+- `required=true` UNIQUEMENT si le serveur crash au démarrage sans cette variable
+- `required=false` pour variables optionnelles avec comportement par défaut
+- Extraire description depuis commentaires dans .env.example
+- `where_to_get` : URL vers documentation d'API externe (ex: https://platform.openai.com/api-keys)
+
+## 4. Gestion des Cas Ambigus
+
+Si plusieurs méthodes d'installation existent (ex: NPM + Docker) :
+- Choisir la plus simple : NPX > Docker > Pip > Build
+- Mentionner l'alternative dans un champ "notes" si nécessaire
+
+Si information manquante ou contradictoire :
+- Ajouter un champ `"confidence": 0.0-1.0` au JSON
+- Ajouter un champ `"warnings": ["warning1", "warning2"]`
+- Si vraiment impossible : `{"error": "raison", "requires_manual_review": true}`
+
+## 5. Cas Spéciaux
+
+**SSE/WebSocket (serveurs HTTP)** :
+- Si le serveur expose un endpoint HTTP (/sse ou websocket)
+- Ajouter `"transport": "sse"` ou `"transport": "websocket"`
+- La commande doit démarrer un serveur web
+- Exemple : command="node", args=["server.js", "--port", "3000"]
+
+**Arguments dynamiques** :
+- Utiliser ${VAR_NAME} dans args pour indiquer injection de variable
+- Exemple : args=["--api-key", "${API_KEY}"]
+
+# EXEMPLES DE SORTIES ATTENDUES
+
+## Exemple 1 : Serveur NPX simple
+{
+  "name": "filesystem",
+  "install": null,
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
+  "env": {}
+}
+
+## Exemple 2 : Serveur Docker avec env vars
+{
+  "name": "postgres-mcp",
+  "install": "docker pull mcp/postgres:latest",
+  "command": "docker",
+  "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
+  "env": {
+    "DATABASE_URL": {
+      "required": true,
+      "description": "PostgreSQL connection string",
+      "default": null,
+      "example": "postgresql://user:pass@localhost:5432/db",
+      "where_to_get": null,
+      "validation_regex": "^postgresql://.+$"
+    }
+  }
+}
+
+## Exemple 3 : Python avec plusieurs env vars
+{
+  "name": "slack-server",
+  "install": "pip install mcp-server-slack",
+  "command": "python",
+  "args": ["-m", "mcp_server_slack"],
+  "env": {
+    "SLACK_BOT_TOKEN": {
+      "required": true,
+      "description": "Slack Bot User OAuth Token",
+      "default": null,
+      "example": "xoxb-xxx...",
+      "where_to_get": "https://api.slack.com/apps"
+    },
+    "SLACK_TEAM_ID": {
+      "required": true,
+      "description": "Slack workspace ID",
+      "default": null,
+      "example": "T01234567"
+    },
+    "LOG_LEVEL": {
+      "required": false,
+      "description": "Logging verbosity",
+      "default": "INFO",
+      "example": "DEBUG"
+    }
+  }
+}
+
+## Exemple 4 : Build from source
+{
+  "name": "custom-server",
+  "install": "git clone https://github.com/user/server && cd server && npm install && npm run build",
+  "command": "node",
+  "args": ["dist/index.js"],
+  "env": {
+    "API_KEY": {
+      "required": true,
+      "description": "API key for service",
+      "default": null,
+      "example": "sk-xxx..."
+    }
+  }
+}
+
+## Exemple 5 : Extraction incertaine
+{
+  "name": "unclear-server",
+  "install": "npm install -g unclear-server",
+  "command": "unclear-server",
+  "args": [],
+  "env": {},
+  "confidence": 0.6,
+  "warnings": [
+    "README doesn't specify env vars clearly",
+    "No .env.example file found",
+    "Installation steps might be incomplete"
+  ]
+}
+
+## Exemple 6 : Échec d'extraction
+{
+  "error": "Unable to determine installation method - no package manager files found",
+  "requires_manual_review": true,
+  "partial_info": {
+    "name": "unknown-server",
+    "suspected_language": "python"
+  }
+}
+
+# VALIDATION FINALE
+
+Avant de retourner le JSON, vérifie :
+- [ ] Tous les champs requis sont présents (name, command, args, env)
+- [ ] command est une commande valide (npx, python, docker, node, uvx, etc.)
+- [ ] args est un array (peut être vide)
+- [ ] env est un object (peut être vide)
+- [ ] Chaque env var a au minimum : required, description, example
+- [ ] Si install présent, c'est une commande shell valide
+- [ ] Pas de caractères spéciaux non échappés dans les strings
+- [ ] Le JSON est valide et parseable
+
+# FORMAT DE RÉPONSE
+
+RETOURNE UNIQUEMENT LE JSON, AUCUN TEXTE AVANT OU APRÈS.
+PAS DE MARKDOWN, PAS DE BACKTICKS, JUSTE LE JSON RAW.

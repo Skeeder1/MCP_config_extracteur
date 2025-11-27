@@ -1,0 +1,565 @@
+Tu analyses un serveur MCP hébergé sur GitHub pour extraire sa configuration de démarrage.
+
+# MÉTADONNÉES DU REPOSITORY
+Nom: blender-mcp
+Description: None
+Topics: None
+Langage principal: Python
+Homepage: None
+
+# FICHIERS DISPONIBLES
+
+Note : Tu recevras entre 3 et 6 fichiers selon leur disponibilité dans le repo.
+Les fichiers ci-dessous sont ceux qui ont été récupérés avec succès.
+
+
+## README.md
+```
+
+
+# BlenderMCP - Blender Model Context Protocol Integration
+
+BlenderMCP connects Blender to Claude AI through the Model Context Protocol (MCP), allowing Claude to directly interact with and control Blender. This integration enables prompt assisted 3D modeling, scene creation, and manipulation.
+
+**We have no official website. Any website you see online is unofficial and has no affiliation with this project. Use them at your own risk.**
+
+[Full tutorial](https://www.youtube.com/watch?v=lCyQ717DuzQ)
+
+### Join the Community
+
+Give feedback, get inspired, and build on top of the MCP: [Discord](https://discord.gg/z5apgR8TFU)
+
+### Supporters
+
+[CodeRabbit](https://www.coderabbit.ai/)
+
+[Satish Goda](https://github.com/satishgoda)
+
+**All supporters:**
+
+[Support this project](https://github.com/sponsors/ahujasid)
+
+## Release notes (1.4.0)
+- Added Hunyuan3D support
+
+
+### Previously added features:
+- View screenshots for Blender viewport to better understand the scene
+- Search and download Sketchfab models
+- Support for Poly Haven assets through their API
+- Support to generate 3D models using Hyper3D Rodin
+- For newcomers, you can go straight to Installation. For existing users, see the points below
+- Download the latest addon.py file and replace the older one, then add it to Blender
+- Delete the MCP server from Claude and add it back again, and you should be good to go!
+- Telemetry for tools executed (completely anonymous)
+
+## Features
+
+- **Two-way communication**: Connect Claude AI to Blender through a socket-based server
+- **Object manipulation**: Create, modify, and delete 3D objects in Blender
+- **Material control**: Apply and modify materials and colors
+- **Scene inspection**: Get detailed information about the current Blender scene
+- **Code execution**: Run arbitrary Python code in Blender from Claude
+
+## Components
+
+The system consists of two main components:
+
+1. **Blender Addon (`addon.py`)**: A Blender addon that creates a socket server within Blender to receive and execute commands
+2. **MCP Server (`src/blender_mcp/server.py`)**: A Python server that implements the Model Context Protocol and connects to the Blender addon
+
+## Installation
+
+
+### Prerequisites
+
+- Blender 3.0 or newer
+- Python 3.10 or newer
+- uv package manager: 
+
+**If you're on Mac, please install uv as**
+```bash
+brew install uv
+```
+**On Windows**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex" 
+```
+and then add uv to the user path in Windows (you may need to restart Claude Desktop after):
+```powershell
+$localBin = "$env:USERPROFILE\.local\bin"
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+[Environment]::SetEnvironmentVariable("Path", "$userPath;$localBin", "User")
+```
+
+Otherwise installation instructions are on their website: [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+**⚠️ Do not proceed before installing UV**
+
+### Environment Variables
+
+The following environment variables can be used to configure the Blender connection:
+
+- `BLENDER_HOST`: Host address for Blender socket server (default: "localhost")
+- `BLENDER_PORT`: Port number for Blender socket server (default: 9876)
+
+Example:
+```bash
+export BLENDER_HOST='host.docker.internal'
+export BLENDER_PORT=9876
+```
+
+### Claude for Desktop Integration
+
+[Watch the setup instruction video](https://www.youtube.com/watch?v=neoK_WMq92g) (Assuming you have already installed uv)
+
+Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json to include the following:
+
+```json
+{
+    "mcpServers": {
+        "blender": {
+            "command": "uvx",
+            "args": [
+                "blender-mcp"
+            ]
+        }
+    }
+}
+```
+
+### Cursor integration
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=blender&config=eyJjb21tYW5kIjoidXZ4IGJsZW5kZXItbWNwIn0%3D)
+
+For Mac users, go to Settings > MCP and paste the following 
+
+- To use as a global server, use "add new global MCP server" button and paste
+- To use as a project specific server, create `.cursor/mcp.json` in the root of the project and paste
+
+
+```json
+{
+    "mcpServers": {
+        "blender": {
+            "command": "uvx",
+            "args": [
+                "blender-mcp"
+            ]
+        }
+    }
+}
+```
+
+For Windows users, go to Settings > MCP > Add Server, add a new server with the following settings:
+
+```json
+{
+    "mcpServers": {
+        "blender": {
+            "command": "cmd",
+            "args": [
+                "/c",
+                "uvx",
+                "blender-mcp"
+            ]
+        }
+    }
+}
+```
+
+[Cursor setup video](https://www.youtube.com/watch?v=wgWsJshecac)
+
+**⚠️ Only run one instance of the MCP server (either on Cursor or Claude Desktop), not both**
+
+### Visual Studio Code Integration
+
+_Prerequisites_: Make sure you have [Visual Studio Code](https://code.visualstudio.com/) installed before proceeding.
+
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_blender--mcp_server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](vscode:mcp/install?%7B%22name%22%3A%22blender-mcp%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22blender-mcp%22%5D%7D)
+
+### Installing the Blender Addon
+
+1. Download the `addon.py` file from this repo
+1. Open Blender
+2. Go to Edit > Preferences > Add-ons
+3. Click "Install..." and select the `addon.py` file
+4. Enable the addon by checking the box next to "Interface: Blender MCP"
+
+
+## Usage
+
+### Starting the Connection
+![BlenderMCP in the sidebar](assets/addon-instructions.png)
+
+1. In Blender, go to the 3D View sidebar (press N if not visible)
+2. Find the "BlenderMCP" tab
+3. Turn on the Poly Haven checkbox if you want assets from their API (optional)
+4. Click "Connect to Claude"
+5. Make sure the MCP server is running in your terminal
+
+### Using with Claude
+
+Once the config file has been set on Claude, and the addon is running on Blender, you will see a hammer icon with tools for the Blender MCP.
+
+![BlenderMCP in the sidebar](assets/hammer-icon.png)
+
+#### Capabilities
+
+- Get scene and object information 
+- Create, delete and modify shapes
+- Apply or create materials for objects
+- Execute any Python code in Blender
+- Download the right models, assets and HDRIs through [Poly Haven](https://polyhaven.com/)
+- AI generated 3D models through [Hyper3D Rodin](https://hyper3d.ai/)
+
+
+### Example Commands
+
+Here are some examples of what you can ask Claude to do:
+
+- "Create a low poly scene in a dungeon, with a dragon guarding a pot of gold" [Demo](https://www.youtube.com/watch?v=DqgKuLYUv00)
+- "Create a beach vibe using HDRIs, textures, and models like rocks and vegetation from Poly Haven" [Demo](https://www.youtube.com/watch?v=I29rn92gkC4)
+- Give a reference image, and create a Blender scene out of it [Demo](https://www.youtube.com/watch?v=FDRb03XPiRo)
+- "Generate a 3D model of a garden gnome through Hyper3D"
+- "Get information about the current scene, and make a threejs sketch from it" [Demo](https://www.youtube.com/watch?v=jxbNI5L7AH8)
+- "Make this car red and metallic" 
+- "Create a sphere and place it above the cube"
+- "Make the lighting like a studio"
+- "Point the camera at the scene, and make it isometric"
+
+## Hyper3D integration
+
+Hyper3D's free trial key allows you to generate a limited number of models per day. If the daily limit is reached, you can wait for the next day's reset or obtain your own key from hyper3d.ai and fal.ai.
+
+## Troubleshooting
+
+- **Connection issues**: Make sure the Blender addon server is running, and the MCP server is configured on Claude, DO NOT run the uvx command in the terminal. Sometimes, the first command won't go through but after that it starts working.
+- **Timeout errors**: Try simplifying your requests or breaking them into smaller steps
+- **Poly Haven integration**: Claude is sometimes erratic with its behaviour
+- **Have you tried turning it off and on again?**: If you're still having connection errors, try restarting both Claude and the Blender server
+
+
+## Technical Details
+
+### Communication Protocol
+
+The system uses a simple JSON-based protocol over TCP sockets:
+
+- **Commands** are sent as JSON objects with a `type` and optional `params`
+- **Responses** are JSON objects with a `status` and `result` or `message`
+
+## Limitations & Security Considerations
+
+- The `execute_blender_code` tool allows running arbitrary Python code in Blender, which can be powerful but potentially dangerous. Use with caution in production environments. ALWAYS save your work before using it.
+- Poly Haven requires downloading models, textures, and HDRI images. If you do not want to use it, please turn it off in the checkbox in Blender. 
+- Complex operations might need to be broken down into smaller steps
+
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Disclaimer
+
+This is a third-party integration and not made by Blender. Made by [Siddharth](https://x.com/sidahuj)
+
+```
+
+## pyproject.toml
+```
+[project]
+name = "blender-mcp"
+version = "1.4.0"
+description = "Blender integration through the Model Context Protocol"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "mcp[cli]>=1.3.0",
+    "supabase>=2.0.0",
+    "tomli>=2.0.0",
+]
+
+[project.scripts]
+blender-mcp = "blender_mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/blender-mcp"
+"Bug Tracker" = "https://github.com/yourusername/blender-mcp/issues"
+
+```
+
+
+---
+
+# OBJECTIF
+Extraire la configuration de démarrage du serveur MCP dans un format JSON structuré.
+
+# FORMAT DE SORTIE ATTENDU
+{
+  "name": "nom-du-serveur",
+  "install": "commande d'installation complète" ou null,
+  "command": "commande de démarrage",
+  "args": ["arg1", "arg2"],
+  "env": {
+    "VAR_NAME": {
+      "required": true ou false,
+      "description": "description claire",
+      "default": "valeur par défaut" ou null,
+      "example": "exemple de valeur",
+      "where_to_get": "URL où obtenir la clé" ou null,
+      "validation_regex": "regex de validation" ou null
+    }
+  }
+}
+
+# RÈGLES D'EXTRACTION
+
+## 1. Détermination du Type d'Installation
+
+Analyse dans cet ordre :
+
+**Docker** :
+- Si Dockerfile ou docker-compose.yml existe
+- Si README mentionne "docker run" ou "docker-compose"
+- Format : command="docker", args=["run", "--rm", "-i", "image:tag"]
+
+**NPM/NPX** :
+- Si package.json existe
+- Si package.json contient un champ "bin"
+- Si le package est dans l'organisation @modelcontextprotocol
+- Format NPX : command="npx", args=["-y", "@org/package"]
+- Format NPM : install="npm install -g package", command="package-name"
+
+**Python/Pip** :
+- Si pyproject.toml ou requirements.txt existe
+- Si pyproject.toml contient [project.scripts]
+- Format : install="pip install package", command="python", args=["-m", "package_name"]
+
+**UV (Python moderne)** :
+- Si README mentionne "uvx" ou "uv pip"
+- Format : install="uv pip install package", command="uvx", args=["package"]
+
+**Cargo (Rust)** :
+- Si Cargo.toml existe
+- Format : install="cargo install package", command="package-name"
+
+**Go** :
+- Si go.mod existe
+- Format : install="go install github.com/user/repo@latest", command="repo"
+
+**Build from Source** :
+- Si aucune méthode packagée n'existe
+- Extraire les étapes de build du README
+- Format : install="git clone && cd && build steps", command="./binary ou node dist/index.js"
+
+## 2. Hiérarchie de Priorité pour les Sources
+
+**Ordre de confiance (du plus fiable au moins fiable)** :
+
+1. **Dockerfile CMD/ENTRYPOINT** → Vérité absolue
+   - La commande exacte qui lance le serveur en production
+   - Les ENV définissent les variables obligatoires
+
+2. **docker-compose.yml** → Très fiable
+   - Section "command" révèle la vraie commande
+   - Section "environment" liste toutes les variables
+
+3. **package.json (Node.js)** → Structure exacte
+   - Champ "bin" → nom de la commande installée
+   - Scripts "start" → comment lancer
+   - Si @modelcontextprotocol/* → toujours utiliser npx -y
+
+4. **pyproject.toml (Python)** → Entry point exact
+   - [project.scripts] → nom de la commande
+   - [tool.poetry.scripts] → idem pour Poetry
+
+5. **.env.example** → Variables d'environnement réelles
+   - Liste exhaustive des variables
+   - Exemples de valeurs
+   - Commentaires explicatifs
+
+6. **README.md** → Contexte général
+   - Instructions d'installation
+   - Exemples d'utilisation
+   - Mais souvent incomplet ou obsolète
+
+## 3. Règles Spécifiques par Type
+
+### NPX/NPM
+- Si le package est @modelcontextprotocol/*, toujours : `command="npx", args=["-y", "package-name"]`
+- Ne pas ajouter d'install pour NPX (null)
+- Args supplémentaires depuis README (ex: chemins, --port, etc.)
+
+### Docker
+- args doit TOUJOURS commencer par : ["run", "--rm", "-i"]
+- `--rm` : supprime le container après arrêt
+- `-i` : mode interactif pour stdio
+- NE PAS inclure `-e VAR=value` dans args (MCP Hub l'injectera automatiquement)
+- Juste mettre le nom de l'image en dernier arg
+
+### Python
+- Si [project.scripts] existe, utiliser ce nom exactement
+- Convertir dashes en underscores pour module name (ex: mcp-server → mcp_server)
+- Si UV détecté : command="uvx" est plus moderne que python -m
+
+### Variables d'Environnement
+- `required=true` UNIQUEMENT si le serveur crash au démarrage sans cette variable
+- `required=false` pour variables optionnelles avec comportement par défaut
+- Extraire description depuis commentaires dans .env.example
+- `where_to_get` : URL vers documentation d'API externe (ex: https://platform.openai.com/api-keys)
+
+## 4. Gestion des Cas Ambigus
+
+Si plusieurs méthodes d'installation existent (ex: NPM + Docker) :
+- Choisir la plus simple : NPX > Docker > Pip > Build
+- Mentionner l'alternative dans un champ "notes" si nécessaire
+
+Si information manquante ou contradictoire :
+- Ajouter un champ `"confidence": 0.0-1.0` au JSON
+- Ajouter un champ `"warnings": ["warning1", "warning2"]`
+- Si vraiment impossible : `{"error": "raison", "requires_manual_review": true}`
+
+## 5. Cas Spéciaux
+
+**SSE/WebSocket (serveurs HTTP)** :
+- Si le serveur expose un endpoint HTTP (/sse ou websocket)
+- Ajouter `"transport": "sse"` ou `"transport": "websocket"`
+- La commande doit démarrer un serveur web
+- Exemple : command="node", args=["server.js", "--port", "3000"]
+
+**Arguments dynamiques** :
+- Utiliser ${VAR_NAME} dans args pour indiquer injection de variable
+- Exemple : args=["--api-key", "${API_KEY}"]
+
+# EXEMPLES DE SORTIES ATTENDUES
+
+## Exemple 1 : Serveur NPX simple
+{
+  "name": "filesystem",
+  "install": null,
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
+  "env": {}
+}
+
+## Exemple 2 : Serveur Docker avec env vars
+{
+  "name": "postgres-mcp",
+  "install": "docker pull mcp/postgres:latest",
+  "command": "docker",
+  "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
+  "env": {
+    "DATABASE_URL": {
+      "required": true,
+      "description": "PostgreSQL connection string",
+      "default": null,
+      "example": "postgresql://user:pass@localhost:5432/db",
+      "where_to_get": null,
+      "validation_regex": "^postgresql://.+$"
+    }
+  }
+}
+
+## Exemple 3 : Python avec plusieurs env vars
+{
+  "name": "slack-server",
+  "install": "pip install mcp-server-slack",
+  "command": "python",
+  "args": ["-m", "mcp_server_slack"],
+  "env": {
+    "SLACK_BOT_TOKEN": {
+      "required": true,
+      "description": "Slack Bot User OAuth Token",
+      "default": null,
+      "example": "xoxb-xxx...",
+      "where_to_get": "https://api.slack.com/apps"
+    },
+    "SLACK_TEAM_ID": {
+      "required": true,
+      "description": "Slack workspace ID",
+      "default": null,
+      "example": "T01234567"
+    },
+    "LOG_LEVEL": {
+      "required": false,
+      "description": "Logging verbosity",
+      "default": "INFO",
+      "example": "DEBUG"
+    }
+  }
+}
+
+## Exemple 4 : Build from source
+{
+  "name": "custom-server",
+  "install": "git clone https://github.com/user/server && cd server && npm install && npm run build",
+  "command": "node",
+  "args": ["dist/index.js"],
+  "env": {
+    "API_KEY": {
+      "required": true,
+      "description": "API key for service",
+      "default": null,
+      "example": "sk-xxx..."
+    }
+  }
+}
+
+## Exemple 5 : Extraction incertaine
+{
+  "name": "unclear-server",
+  "install": "npm install -g unclear-server",
+  "command": "unclear-server",
+  "args": [],
+  "env": {},
+  "confidence": 0.6,
+  "warnings": [
+    "README doesn't specify env vars clearly",
+    "No .env.example file found",
+    "Installation steps might be incomplete"
+  ]
+}
+
+## Exemple 6 : Échec d'extraction
+{
+  "error": "Unable to determine installation method - no package manager files found",
+  "requires_manual_review": true,
+  "partial_info": {
+    "name": "unknown-server",
+    "suspected_language": "python"
+  }
+}
+
+# VALIDATION FINALE
+
+Avant de retourner le JSON, vérifie :
+- [ ] Tous les champs requis sont présents (name, command, args, env)
+- [ ] command est une commande valide (npx, python, docker, node, uvx, etc.)
+- [ ] args est un array (peut être vide)
+- [ ] env est un object (peut être vide)
+- [ ] Chaque env var a au minimum : required, description, example
+- [ ] Si install présent, c'est une commande shell valide
+- [ ] Pas de caractères spéciaux non échappés dans les strings
+- [ ] Le JSON est valide et parseable
+
+# FORMAT DE RÉPONSE
+
+RETOURNE UNIQUEMENT LE JSON, AUCUN TEXTE AVANT OU APRÈS.
+PAS DE MARKDOWN, PAS DE BACKTICKS, JUSTE LE JSON RAW.

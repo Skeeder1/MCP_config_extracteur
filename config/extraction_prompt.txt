@@ -1,0 +1,273 @@
+Tu analyses un serveur MCP hébergé sur GitHub pour extraire sa configuration de démarrage.
+
+# MÉTADONNÉES DU REPOSITORY
+Nom: {name}
+Description: {description}
+Topics: {topics}
+Langage principal: {language}
+Homepage: {homepage}
+
+# FICHIERS DISPONIBLES
+
+Note : Tu recevras entre 3 et 6 fichiers selon leur disponibilité dans le repo.
+Les fichiers ci-dessous sont ceux qui ont été récupérés avec succès.
+
+{files_content}
+
+---
+
+# OBJECTIF
+Extraire la configuration de démarrage du serveur MCP dans un format JSON structuré.
+
+# FORMAT DE SORTIE ATTENDU
+{{
+  "name": "nom-du-serveur",
+  "install": "commande d'installation complète" ou null,
+  "command": "commande de démarrage",
+  "args": ["arg1", "arg2"],
+  "env": {{
+    "VAR_NAME": {{
+      "required": true ou false,
+      "description": "description claire",
+      "default": "valeur par défaut" ou null,
+      "example": "exemple de valeur",
+      "where_to_get": "URL où obtenir la clé" ou null,
+      "validation_regex": "regex de validation" ou null
+    }}
+  }}
+}}
+
+# RÈGLES D'EXTRACTION
+
+## 1. Détermination du Type d'Installation
+
+Analyse dans cet ordre :
+
+**Docker** :
+- Si Dockerfile ou docker-compose.yml existe
+- Si README mentionne "docker run" ou "docker-compose"
+- Format : command="docker", args=["run", "--rm", "-i", "image:tag"]
+
+**NPM/NPX** :
+- Si package.json existe
+- Si package.json contient un champ "bin"
+- Si le package est dans l'organisation @modelcontextprotocol
+- Format NPX : command="npx", args=["-y", "@org/package"]
+- Format NPM : install="npm install -g package", command="package-name"
+
+**Python/Pip** :
+- Si pyproject.toml ou requirements.txt existe
+- Si pyproject.toml contient [project.scripts]
+- Format : install="pip install package", command="python", args=["-m", "package_name"]
+
+**UV (Python moderne)** :
+- Si README mentionne "uvx" ou "uv pip"
+- Format : install="uv pip install package", command="uvx", args=["package"]
+
+**Cargo (Rust)** :
+- Si Cargo.toml existe
+- Format : install="cargo install package", command="package-name"
+
+**Go** :
+- Si go.mod existe
+- Format : install="go install github.com/user/repo@latest", command="repo"
+
+**Build from Source** :
+- Si aucune méthode packagée n'existe
+- Extraire les étapes de build du README
+- Format : install="git clone && cd && build steps", command="./binary ou node dist/index.js"
+
+## 2. Hiérarchie de Priorité pour les Sources
+
+**Ordre de confiance (du plus fiable au moins fiable)** :
+
+1. **Dockerfile CMD/ENTRYPOINT** → Vérité absolue
+   - La commande exacte qui lance le serveur en production
+   - Les ENV définissent les variables obligatoires
+
+2. **docker-compose.yml** → Très fiable
+   - Section "command" révèle la vraie commande
+   - Section "environment" liste toutes les variables
+
+3. **package.json (Node.js)** → Structure exacte
+   - Champ "bin" → nom de la commande installée
+   - Scripts "start" → comment lancer
+   - Si @modelcontextprotocol/* → toujours utiliser npx -y
+
+4. **pyproject.toml (Python)** → Entry point exact
+   - [project.scripts] → nom de la commande
+   - [tool.poetry.scripts] → idem pour Poetry
+
+5. **.env.example** → Variables d'environnement réelles
+   - Liste exhaustive des variables
+   - Exemples de valeurs
+   - Commentaires explicatifs
+
+6. **README.md** → Contexte général
+   - Instructions d'installation
+   - Exemples d'utilisation
+   - Mais souvent incomplet ou obsolète
+
+## 3. Règles Spécifiques par Type
+
+### NPX/NPM
+- Si le package est @modelcontextprotocol/*, toujours : `command="npx", args=["-y", "package-name"]`
+- Ne pas ajouter d'install pour NPX (null)
+- Args supplémentaires depuis README (ex: chemins, --port, etc.)
+
+### Docker
+- args doit TOUJOURS commencer par : ["run", "--rm", "-i"]
+- `--rm` : supprime le container après arrêt
+- `-i` : mode interactif pour stdio
+- NE PAS inclure `-e VAR=value` dans args (MCP Hub l'injectera automatiquement)
+- Juste mettre le nom de l'image en dernier arg
+
+### Python
+- Si [project.scripts] existe, utiliser ce nom exactement
+- Convertir dashes en underscores pour module name (ex: mcp-server → mcp_server)
+- Si UV détecté : command="uvx" est plus moderne que python -m
+
+### Variables d'Environnement
+- `required=true` UNIQUEMENT si le serveur crash au démarrage sans cette variable
+- `required=false` pour variables optionnelles avec comportement par défaut
+- Extraire description depuis commentaires dans .env.example
+- `where_to_get` : URL vers documentation d'API externe (ex: https://platform.openai.com/api-keys)
+
+## 4. Gestion des Cas Ambigus
+
+Si plusieurs méthodes d'installation existent (ex: NPM + Docker) :
+- Choisir la plus simple : NPX > Docker > Pip > Build
+- Mentionner l'alternative dans un champ "notes" si nécessaire
+
+Si information manquante ou contradictoire :
+- Ajouter un champ `"confidence": 0.0-1.0` au JSON
+- Ajouter un champ `"warnings": ["warning1", "warning2"]`
+- Si vraiment impossible : `{{"error": "raison", "requires_manual_review": true}}`
+
+## 5. Cas Spéciaux
+
+**SSE/WebSocket (serveurs HTTP)** :
+- Si le serveur expose un endpoint HTTP (/sse ou websocket)
+- Ajouter `"transport": "sse"` ou `"transport": "websocket"`
+- La commande doit démarrer un serveur web
+- Exemple : command="node", args=["server.js", "--port", "3000"]
+
+**Arguments dynamiques** :
+- Utiliser ${{VAR_NAME}} dans args pour indiquer injection de variable
+- Exemple : args=["--api-key", "${{API_KEY}}"]
+
+# EXEMPLES DE SORTIES ATTENDUES
+
+## Exemple 1 : Serveur NPX simple
+{{
+  "name": "filesystem",
+  "install": null,
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
+  "env": {{}}
+}}
+
+## Exemple 2 : Serveur Docker avec env vars
+{{
+  "name": "postgres-mcp",
+  "install": "docker pull mcp/postgres:latest",
+  "command": "docker",
+  "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
+  "env": {{
+    "DATABASE_URL": {{
+      "required": true,
+      "description": "PostgreSQL connection string",
+      "default": null,
+      "example": "postgresql://user:pass@localhost:5432/db",
+      "where_to_get": null,
+      "validation_regex": "^postgresql://.+$"
+    }}
+  }}
+}}
+
+## Exemple 3 : Python avec plusieurs env vars
+{{
+  "name": "slack-server",
+  "install": "pip install mcp-server-slack",
+  "command": "python",
+  "args": ["-m", "mcp_server_slack"],
+  "env": {{
+    "SLACK_BOT_TOKEN": {{
+      "required": true,
+      "description": "Slack Bot User OAuth Token",
+      "default": null,
+      "example": "xoxb-xxx...",
+      "where_to_get": "https://api.slack.com/apps"
+    }},
+    "SLACK_TEAM_ID": {{
+      "required": true,
+      "description": "Slack workspace ID",
+      "default": null,
+      "example": "T01234567"
+    }},
+    "LOG_LEVEL": {{
+      "required": false,
+      "description": "Logging verbosity",
+      "default": "INFO",
+      "example": "DEBUG"
+    }}
+  }}
+}}
+
+## Exemple 4 : Build from source
+{{
+  "name": "custom-server",
+  "install": "git clone https://github.com/user/server && cd server && npm install && npm run build",
+  "command": "node",
+  "args": ["dist/index.js"],
+  "env": {{
+    "API_KEY": {{
+      "required": true,
+      "description": "API key for service",
+      "default": null,
+      "example": "sk-xxx..."
+    }}
+  }}
+}}
+
+## Exemple 5 : Extraction incertaine
+{{
+  "name": "unclear-server",
+  "install": "npm install -g unclear-server",
+  "command": "unclear-server",
+  "args": [],
+  "env": {{}},
+  "confidence": 0.6,
+  "warnings": [
+    "README doesn't specify env vars clearly",
+    "No .env.example file found",
+    "Installation steps might be incomplete"
+  ]
+}}
+
+## Exemple 6 : Échec d'extraction
+{{
+  "error": "Unable to determine installation method - no package manager files found",
+  "requires_manual_review": true,
+  "partial_info": {{
+    "name": "unknown-server",
+    "suspected_language": "python"
+  }}
+}}
+
+# VALIDATION FINALE
+
+Avant de retourner le JSON, vérifie :
+- [ ] Tous les champs requis sont présents (name, command, args, env)
+- [ ] command est une commande valide (npx, python, docker, node, uvx, etc.)
+- [ ] args est un array (peut être vide)
+- [ ] env est un object (peut être vide)
+- [ ] Chaque env var a au minimum : required, description, example
+- [ ] Si install présent, c'est une commande shell valide
+- [ ] Pas de caractères spéciaux non échappés dans les strings
+- [ ] Le JSON est valide et parseable
+
+# FORMAT DE RÉPONSE
+
+RETOURNE UNIQUEMENT LE JSON, AUCUN TEXTE AVANT OU APRÈS.
+PAS DE MARKDOWN, PAS DE BACKTICKS, JUSTE LE JSON RAW.
