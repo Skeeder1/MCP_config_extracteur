@@ -26,8 +26,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# Generated output
-top_200_mcp_servers.json
+# Backups
+backups/
+
+# Generated prompts (for debugging)
+prompts/
 
 # IDE
 .vscode/

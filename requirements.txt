@@ -14,3 +14,10 @@ openai>=1.30.0
 
 # Common
 python-dotenv>=1.0.0
+
+# Database (PostgreSQL)
+psycopg2-binary>=2.9.9
+
+# Testing
+pytest>=7.4.3
+pytest-asyncio>=0.23.5

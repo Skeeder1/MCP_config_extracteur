@@ -4,13 +4,16 @@ Main entry point for GitHub crawler.
 Fetches files and metadata from MCP server repositories.
 """
 
+import argparse
 import json
+import os
 import sys
 from datetime import datetime
 
 import structlog
 from src.config import CrawlerConfig
-from src.github_crawler import GitHubCrawler
+from src.database.db_manager import DatabaseManager
+from src.services.crawler_service import CrawlerService
 
 # Configure structured logging
 structlog.configure(
@@ -24,9 +27,48 @@ structlog.configure(
 logger = structlog.get_logger()
 
 
+def parse_arguments() -> argparse.Namespace:
+    """Parse command-line arguments for crawling control."""
+    parser = argparse.ArgumentParser(
+        description="Crawl GitHub repositories for MCP server files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python run_crawler.py                      # Mode par défaut (test_mode from .env)
+  python run_crawler.py --limit 10          # Crawler 10 nouveaux serveurs
+  python run_crawler.py --limit 50          # Crawler 50 serveurs
+        """
+    )
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        metavar="N",
+        help="Nombre de nouveaux serveurs à crawler (ignore test_mode)"
+    )
+
+    return parser.parse_args()
+
+
+def get_processed_repos(crawler_service: CrawlerService) -> set[str]:
+    """
+    Récupère les URLs déjà crawlées depuis PostgreSQL.
+
+    Args:
+        crawler_service: Instance du CrawlerService
+
+    Returns:
+        Set des github_url déjà présentes dans la base de données
+    """
+    return crawler_service.get_processed_urls()
+
+
 def main():
     """Main execution function."""
     try:
+        # 0. Parse command-line arguments
+        args = parse_arguments()
+
         # 1. Load configuration
         logger.info("loading_configuration")
         config = CrawlerConfig()
@@ -35,13 +77,23 @@ def main():
             "config_loaded",
             test_mode=config.test_mode,
             test_limit=config.test_limit if config.test_mode else "all",
-            input_file=config.input_file,
-            output_file=config.output_file
+            input_file=config.input_file
         )
 
-        # 2. Initialize crawler
-        logger.info("initializing_crawler")
-        crawler = GitHubCrawler(config.github_token)
+        # 2. Initialize database and crawler service
+        logger.info("initializing_database")
+        db_manager = DatabaseManager()
+        crawler_service = CrawlerService(db_manager, config.github_token)
+
+        # 2b. Load existing crawled repos from PostgreSQL
+        crawled_urls = get_processed_repos(crawler_service)
+
+        if crawled_urls:
+            logger.info("existing_repos_loaded", count=len(crawled_urls))
+            print(f"📂 {len(crawled_urls)} serveurs déjà crawlés chargés depuis PostgreSQL\n")
+        else:
+            logger.info("no_existing_repos")
+            print(f"📂 Aucun repo existant (base de données vide)\n")
 
         # 3. Load server list
         logger.info("loading_server_list", file=config.input_file)
@@ -51,87 +103,104 @@ def main():
 
         logger.info("servers_loaded", total=len(servers))
 
-        # 4. Apply test mode if enabled
-        if config.test_mode:
+        # 3b. Filter out already-crawled servers
+        original_count = len(servers)
+        servers = [s for s in servers if s["github_url"] not in crawled_urls]
+        filtered_count = original_count - len(servers)
+
+        logger.info(
+            "servers_filtered",
+            original=original_count,
+            filtered=filtered_count,
+            remaining=len(servers)
+        )
+
+        print(f"🔍 {original_count} serveurs dans l'input")
+        print(f"⏭️  {filtered_count} serveurs déjà crawlés (skippés)")
+        print(f"✨ {len(servers)} nouveaux serveurs disponibles\n")
+
+        # Early exit if no new servers
+        if not servers:
+            print("✓ Tous les serveurs ont déjà été crawlés!")
+            return 0
+
+        # 4. Apply limit from --limit or test_mode
+        if args.limit is not None:
+            # CLI argument takes precedence
+            limit = min(args.limit, len(servers))
+            servers = servers[:limit]
+            print(f"🎯 Limite CLI: crawling de {len(servers)} nouveaux serveurs (--limit {args.limit})\n")
+        elif config.test_mode:
+            # Fallback to test mode
             servers = servers[:config.test_limit]
-            print(f"\n🔬 Mode test activé: traitement de {len(servers)} serveurs\n")
+            print(f"🔬 Mode test: crawling de {len(servers)} nouveaux serveurs\n")
         else:
-            print(f"\n🚀 Mode production: traitement de {len(servers)} serveurs\n")
+            print(f"🚀 Mode production: crawling de {len(servers)} nouveaux serveurs\n")
 
         # 5. Check rate limit before starting
-        crawler.check_rate_limit()
+        crawler_service.crawler.check_rate_limit()
 
-        # 6. Crawl each repository
+        # 6. Crawl each repository and store in PostgreSQL
         results = []
         total = len(servers)
+        success_count = 0
+        skipped_count = 0
+        error_count = 0
 
         for i, server in enumerate(servers, 1):
             github_url = server["github_url"]
             print(f"[{i}/{total}] Crawling: {github_url}")
 
-            # Fetch repo data with retry
-            repo_data = crawler.fetch_repo_data_with_retry(github_url)
-            results.append(repo_data)
+            # Process server (crawl + store in DB)
+            result = crawler_service.process_server(server)
+            results.append(result)
 
             # Display result
-            if "error" in repo_data:
-                print(f"  ❌ Erreur: {repo_data['error']}")
-            else:
-                files_count = repo_data['files_count']
-                language = repo_data['metadata'].get('language', 'Unknown')
-                print(f"  ✓ {files_count} fichiers récupérés ({language})")
+            status = result.get('status')
+            if status == 'success':
+                success_count += 1
+                files_count = result.get('files_count', 0)
+                readme = "✓" if result.get('readme_stored') else "✗"
+                print(f"  ✓ {files_count} fichiers récupérés | README: {readme}")
+            elif status == 'skipped':
+                skipped_count += 1
+                print(f"  ⏭️  {result.get('message', 'Skipped')}")
+            else:  # error
+                error_count += 1
+                print(f"  ❌ Erreur: {result.get('error', 'Unknown error')}")
 
             # Check rate limit periodically
             if i % 10 == 0:
-                crawler.check_rate_limit()
+                crawler_service.crawler.check_rate_limit()
 
-        # 7. Calculate statistics
-        stats = {
-            "total_repos": total,
-            "success": len([r for r in results if "error" not in r]),
-            "failed": len([r for r in results if "error" in r]),
-            "total_files_fetched": sum(r.get("files_count", 0) for r in results)
-        }
+        # 7. Get statistics from PostgreSQL
+        db_stats = crawler_service.get_crawl_statistics()
 
-        # Calculate average files per successful repo
-        if stats["success"] > 0:
-            stats["avg_files_per_repo"] = round(
-                stats["total_files_fetched"] / stats["success"], 2
-            )
-        else:
-            stats["avg_files_per_repo"] = 0
-
-        # 8. Build final output
-        output = {
-            "metadata": {
-                "crawled_at": datetime.utcnow().isoformat() + "Z",
-                "source_file": config.input_file,
-                "test_mode": config.test_mode,
-                "stats": stats
-            },
-            "repos": results
-        }
-
-        # 9. Save to file
-        logger.info("saving_results", file=config.output_file)
-        with open(config.output_file, 'w', encoding='utf-8') as f:
-            json.dump(output, f, indent=2, ensure_ascii=False)
-
-        # 10. Display summary
+        # 8. Display summary
         print("\n" + "="*60)
         print("✓ Crawling terminé!")
         print("="*60)
-        print(f"  Succès:           {stats['success']}/{stats['total_repos']} repos")
-        print(f"  Échecs:           {stats['failed']}/{stats['total_repos']} repos")
-        print(f"  Fichiers récupérés: {stats['total_files_fetched']} total")
-        print(f"  Moyenne:          {stats['avg_files_per_repo']} fichiers/repo")
-        print(f"  Output:           {config.output_file}")
+        print(f"  Traités:            {len(results)} serveurs")
+        print(f"  Succès:             {success_count}/{len(results)} serveurs")
+        print(f"  Skippés:            {skipped_count}/{len(results)} serveurs")
+        print(f"  Échecs:             {error_count}/{len(results)} serveurs")
+        print()
+        print(f"  Total en base:      {db_stats['total_servers']} serveurs")
+        print(f"  Avec README:        {db_stats['with_readme']} serveurs")
+        print(f"  Moyenne étoiles:    {db_stats['avg_stars']} ⭐")
+        print()
+        print(f"  Par status:")
+        for status, count in db_stats['by_status'].items():
+            print(f"    - {status}: {count}")
         print("="*60)
 
-        # Final rate limit check
-        crawler.check_rate_limit()
+        # 9. Final rate limit check
+        crawler_service.crawler.check_rate_limit()
 
-        logger.info("crawling_completed", stats=stats)
+        # 10. Cleanup
+        db_manager.close()
+
+        logger.info("crawling_completed", processed=len(results), db_stats=db_stats)
 
         return 0
 

@@ -4,14 +4,18 @@ Main entry point for LLM extraction (Phase 2).
 Extracts MCP configurations from crawled GitHub data.
 """
 
+import argparse
 import asyncio
 import json
+import os
 import sys
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import structlog
 from src.config import ExtractorConfig
+from src.database.db_manager import DatabaseManager
+from src.services.extractor_service import ExtractorService
 from src.llm_extractor import LLMExtractor
 from src.prompt_builder import PromptBuilder
 from src.llm_validator import LLMValidator
@@ -28,7 +32,44 @@ structlog.configure(
 logger = structlog.get_logger()
 
 
-async def process_repo(
+def parse_arguments() -> argparse.Namespace:
+    """Parse command-line arguments for extraction control."""
+    parser = argparse.ArgumentParser(
+        description="Extract MCP server configurations from GitHub repos",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python run_extractor.py                    # Mode par défaut (test_mode from .env)
+  python run_extractor.py --limit 10        # Extraire 10 nouveaux serveurs
+  python run_extractor.py --limit 50        # Extraire 50 serveurs
+        """
+    )
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        metavar="N",
+        help="Nombre de nouveaux serveurs à extraire (ignore test_mode)"
+    )
+
+    return parser.parse_args()
+
+
+def get_servers_to_process(extractor_service: ExtractorService, limit: Optional[int] = None) -> List[dict]:
+    """
+    Récupère les serveurs à traiter depuis PostgreSQL.
+
+    Args:
+        extractor_service: Instance du ExtractorService
+        limit: Nombre maximum de serveurs
+
+    Returns:
+        Liste de serveurs sans config
+    """
+    return extractor_service.get_servers_to_process(limit)
+
+
+async def process_repo_legacy(
     repo_data: Dict,
     prompt_builder: PromptBuilder,
     extractor: LLMExtractor,
@@ -200,6 +241,9 @@ async def main_async():
     """Main async execution function."""
 
     try:
+        # 0. Parse command-line arguments
+        args = parse_arguments()
+
         # 1. Load configuration
         logger.info("loading_configuration")
         config = ExtractorConfig()
@@ -211,49 +255,88 @@ async def main_async():
             model=config.model
         )
 
-        # 2. Initialize components
+        # 2. Initialize database and components
+        logger.info("initializing_database")
+        db_manager = DatabaseManager()
+
         logger.info("initializing_components")
         prompt_builder = PromptBuilder(config.prompt_template_file, config.prompts_dir)
         extractor = LLMExtractor(config)
         validator = LLMValidator(config, config.validation_prompt_file)
 
-        # 3. Load Phase 1 data
-        logger.info("loading_phase1_data", file=config.input_file)
-        with open(config.input_file, 'r', encoding='utf-8') as f:
-            phase1_data = json.load(f)
-            repos = phase1_data["repos"]
+        # Create extractor service
+        extractor_service = ExtractorService(
+            db_manager,
+            extractor,
+            validator,
+            prompt_builder
+        )
 
-        logger.info("phase1_data_loaded", total_repos=len(repos))
+        # 3. Get servers to process from PostgreSQL
+        logger.info("loading_servers_to_process")
 
-        # 4. Apply test mode if enabled
-        if config.test_mode:
-            repos = repos[:config.test_limit]
-            print(f"\n🔬 Mode test activé: traitement de {len(repos)} repos\n")
+        # Determine limit
+        limit = None
+        if args.limit is not None:
+            limit = args.limit
+        elif config.test_mode:
+            limit = config.test_limit
+
+        servers = get_servers_to_process(extractor_service, limit)
+
+        logger.info("servers_to_process_loaded", count=len(servers))
+
+        print(f"🔍 {len(servers)} serveurs sans config disponibles\n")
+
+        # Early exit if no servers to process
+        if not servers:
+            print("✓ Tous les serveurs ont déjà une config!")
+            return 0
+
+        # 4. Display processing info
+        if args.limit is not None:
+            print(f"🎯 Limite CLI: traitement de {len(servers)} serveurs (--limit {args.limit})\n")
+        elif config.test_mode:
+            print(f"🔬 Mode test: traitement de {len(servers)} serveurs\n")
         else:
-            print(f"\n🚀 Mode production: traitement de {len(repos)} repos\n")
+            print(f"🚀 Mode production: traitement de {len(servers)} serveurs\n")
 
-        # 5. Process repos in batches (async parallel)
+        # 5. Process servers in batches (async parallel)
         all_results = []
-        total = len(repos)
+        total = len(servers)
         batch_size = config.batch_size
 
         for i in range(0, total, batch_size):
-            batch = repos[i:i+batch_size]
+            batch = servers[i:i+batch_size]
             batch_num = i // batch_size + 1
             total_batches = (total + batch_size - 1) // batch_size
 
-            print(f"\n📦 Batch {batch_num}/{total_batches} ({len(batch)} repos)")
+            print(f"\n📦 Batch {batch_num}/{total_batches} ({len(batch)} serveurs)")
 
-            results = await process_batch(
-                batch,
-                prompt_builder,
-                extractor,
-                validator,
-                i,
-                total
-            )
+            # Process batch via ExtractorService (extraction + validation + storage)
+            results = await extractor_service.process_batch(batch, i, total)
 
             all_results.extend(results)
+
+            # Display validated results
+            for result in results:
+                extraction = result.get('extraction', {})
+                status = extraction.get('status', 'unknown')
+                score = extraction.get('score', 0.0)
+                name = result.get('github_metadata', {}).get('name', 'Unknown')
+
+                status_emoji = {
+                    "approved": "✅",
+                    "needs_review": "⚠️",
+                    "rejected": "❌"
+                }
+
+                print(
+                    f"  [{i + results.index(result) + 1}/{total}] "
+                    f"{status_emoji.get(status, '?')} "
+                    f"{name} "
+                    f"(score: {score:.1f}/10)"
+                )
 
             logger.info(
                 "batch_completed",
@@ -262,63 +345,39 @@ async def main_async():
                 total=total
             )
 
-        # 6. Calculate statistics
-        stats = {
-            "total_repos": total,
-            "approved": len([r for r in all_results if r["extraction"]["status"] == "approved"]),
-            "needs_review": len([r for r in all_results if r["extraction"]["status"] == "needs_review"]),
-            "rejected": len([r for r in all_results if r["extraction"]["status"] == "rejected"])
+        # 6. Calculate statistics from current batch
+        batch_stats = {
+            "processed": len(all_results),
+            "approved": len([r for r in all_results if r.get("extraction", {}).get("status") == "approved"]),
+            "needs_review": len([r for r in all_results if r.get("extraction", {}).get("status") == "needs_review"]),
+            "rejected": len([r for r in all_results if r.get("extraction", {}).get("status") == "rejected"])
         }
 
-        stats["success_rate"] = round(
-            (stats["approved"] + stats["needs_review"]) / stats["total_repos"] * 100, 2
-        ) if stats["total_repos"] > 0 else 0
+        # 7. Get global statistics from PostgreSQL
+        db_stats = extractor_service.get_extraction_statistics()
 
-        stats["auto_approval_rate"] = round(
-            stats["approved"] / stats["total_repos"] * 100, 2
-        ) if stats["total_repos"] > 0 else 0
-
-        # Calculate average confidence by category
-        for category in ["approved", "needs_review", "rejected"]:
-            category_results = [
-                r for r in all_results
-                if r["extraction"]["status"] == category
-            ]
-            if category_results:
-                avg_conf = sum(r["extraction"]["confidence"] for r in category_results) / len(category_results)
-                stats[f"avg_confidence_{category}"] = round(avg_conf, 3)
-
-        # 7. Build final output
-        output = {
-            "metadata": {
-                "extracted_at": datetime.utcnow().isoformat() + "Z",
-                "source_file": config.input_file,
-                "model": config.model,
-                "test_mode": config.test_mode,
-                "batch_size": config.batch_size,
-                "stats": stats
-            },
-            "extractions": all_results
-        }
-
-        # 8. Save to file
-        logger.info("saving_results", file=config.output_file)
-        with open(config.output_file, 'w', encoding='utf-8') as f:
-            json.dump(output, f, indent=2, ensure_ascii=False)
-
-        # 9. Display summary
+        # 8. Display summary
         print("\n" + "="*70)
         print("✓ Extraction terminée!")
         print("="*70)
-        print(f"  Total:            {stats['total_repos']} repos")
-        print(f"  Approuvés:        {stats['approved']} ({stats['auto_approval_rate']:.1f}%)")
-        print(f"  À réviser:        {stats['needs_review']}")
-        print(f"  Rejetés:          {stats['rejected']}")
-        print(f"  Taux de succès:   {stats['success_rate']:.1f}%")
-        print(f"  Output:           {config.output_file}")
+        print(f"  Traités:          {batch_stats['processed']} serveurs")
+        print(f"  Approuvés:        {batch_stats['approved']}")
+        print(f"  À réviser:        {batch_stats['needs_review']}")
+        print(f"  Rejetés:          {batch_stats['rejected']}")
+        print()
+        print(f"  Total en base:    {db_stats['total_servers']} serveurs")
+        print(f"  Avec config:      {db_stats['with_config']}")
+        print(f"  Sans config:      {db_stats['without_config']}")
+        print()
+        print(f"  Par status:")
+        for status, count in db_stats['by_status'].items():
+            print(f"    - {status}: {count}")
         print("="*70)
 
-        logger.info("extraction_completed", stats=stats)
+        # 9. Cleanup
+        db_manager.close()
+
+        logger.info("extraction_completed", batch_stats=batch_stats, db_stats=db_stats)
 
         return 0
 

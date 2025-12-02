@@ -92,19 +92,19 @@ class LLMValidator:
 
             # Parse JSON response
             response_text = response.content.strip()
-            
+
             # Save raw response for debugging
             response_file = self.prompts_dir / f"validation_{self.batch_counter}_response.txt"
             with open(response_file, 'w', encoding='utf-8') as f:
                 f.write(response_text)
-            
+
             logger.info(
                 "llm_response_received",
                 batch=self.batch_counter,
                 response_length=len(response_text),
                 response_preview=response_text[:200]
             )
-            
+
             # Extract JSON from response (handles text before/after JSON)
             try:
                 response_text = extract_json_from_text(response_text)

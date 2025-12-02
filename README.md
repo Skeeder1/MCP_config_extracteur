@@ -40,8 +40,8 @@ python extract.py pipeline
 # Ou phases individuelles
 python extract.py crawl              # Phase 1 seulement
 python extract.py extract            # Phase 2 seulement
-python extract.py validate <file>    # Validation
-python extract.py analyze <file>     # Analyse qualité
+python extract.py validate           # Validation PostgreSQL
+python extract.py analyze            # Analyse qualité PostgreSQL
 ```
 
 ### Méthode Classique (toujours supportée)
@@ -54,14 +54,16 @@ python run_crawler.py
 python run_extractor.py
 
 # Validation manuelle
-python scripts/validate_extraction_output.py data/output/extracted_configs.json
+python scripts/validate_extraction_output.py
 ```
 
 ## Résultats de l'Extraction
 
-Le pipeline génère `data/output/extracted_configs.json` contenant:
-- Configurations extraites avec validation
-- Statut : `approved` (90%+ confiance), `needs_review` (70-90%), `rejected` (<70%)
+Le pipeline stocke les données dans PostgreSQL:
+- **mcp_servers** : Métadonnées GitHub crawlées
+- **mcp_configs** : Configurations extraites avec validation
+- **mcp_content** : Contenu des fichiers (README, etc.)
+- Statut : `approved` (score ≥ 7.0), `pending` (5.0-7.0), `rejected` (< 5.0)
 - Métadonnées : tokens utilisés, fichiers analysés, timestamp
 
 ## Structure du projet
@@ -83,11 +85,12 @@ Le pipeline génère `data/output/extracted_configs.json` contenant:
 │   ├── validate_extraction_output.py  # Validation schéma
 │   └── analyze_extraction_quality.py  # Analyse qualité/coûts
 ├── data/
-│   ├── input/              # Données source (top_200_mcp_servers.json)
-│   └── output/             # Résultats (github_crawled_data.json, extracted_configs.json)
+│   └── input/              # Données source (top_200_mcp_servers.json)
+├── database/
+│   └── schema.sql          # Schéma PostgreSQL
 ├── config/
-│   └── extraction_prompt.txt  # Template du prompt LLM
-├── archive/                # Fichiers legacy archivés
+│   ├── extraction_prompt.txt  # Template du prompt LLM
+│   └── validation_prompt.txt  # Template de validation
 └── requirements.txt        # Dépendances Python
 ```
 

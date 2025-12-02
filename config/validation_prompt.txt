@@ -16,13 +16,13 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <example category="npx_simple" score="10.0">
 <config>
-{
+{{
   "name": "filesystem",
   "install": null,
   "command": "npx",
   "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/files"],
-  "env": {}
-}
+  "env": {{}}
+}}
 </config>
 <why_perfect>
 - npx with -y flag (non-interactive)
@@ -35,22 +35,22 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <example category="docker_with_env" score="10.0">
 <config>
-{
+{{
   "name": "postgres-mcp",
   "install": "docker pull mcp/postgres:latest",
   "command": "docker",
   "args": ["run", "--rm", "-i", "mcp/postgres:latest"],
-  "env": {
-    "DATABASE_URL": {
+  "env": {{
+    "DATABASE_URL": {{
       "required": true,
       "description": "PostgreSQL connection string",
       "default": null,
       "example": "postgresql://user:pass@localhost:5432/db",
       "where_to_get": null,
       "validation_regex": "^postgresql://.+$"
-    }
-  }
-}
+    }}
+  }}
+}}
 </config>
 <why_perfect>
 - Docker args: ["run", "--rm", "-i"] (MCP stdio protocol)
@@ -63,30 +63,30 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <example category="python_module" score="10.0">
 <config>
-{
+{{
   "name": "slack-server",
   "install": "pip install mcp-server-slack",
   "command": "python",
   "args": ["-m", "mcp_server_slack"],
-  "env": {
-    "SLACK_BOT_TOKEN": {
+  "env": {{
+    "SLACK_BOT_TOKEN": {{
       "required": true,
       "description": "Slack Bot User OAuth Token",
       "default": null,
       "example": "xoxb-xxx...",
       "where_to_get": "https://api.slack.com/apps",
       "validation_regex": "^xoxb-[a-zA-Z0-9-]+"
-    },
-    "SLACK_TEAM_ID": {
+    }},
+    "SLACK_TEAM_ID": {{
       "required": true,
       "description": "Slack workspace ID",
       "default": null,
       "example": "T01234567",
       "where_to_get": "Find in Slack workspace URL",
-      "validation_regex": "^T[A-Z0-9]{8,}$"
-    }
-  }
-}
+      "validation_regex": "^T[A-Z0-9]{{8,}}$"
+    }}
+  }}
+}}
 </config>
 <why_perfect>
 - Python -m flag for module execution
@@ -99,22 +99,22 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <example category="uv_modern_python" score="10.0">
 <config>
-{
+{{
   "name": "slack-server-uv",
   "install": "uv pip install mcp-server-slack",
   "command": "uvx",
   "args": ["mcp-server-slack"],
-  "env": {
-    "SLACK_BOT_TOKEN": {
+  "env": {{
+    "SLACK_BOT_TOKEN": {{
       "required": true,
       "description": "Slack Bot User OAuth Token with chat:write scope",
       "default": null,
       "example": "xoxb-xxx...",
       "where_to_get": "https://api.slack.com/apps → OAuth & Permissions",
       "validation_regex": "^xoxb-"
-    }
-  }
-}
+    }}
+  }}
+}}
 </config>
 <why_perfect>
 - uvx is the modern uv executor
@@ -131,13 +131,13 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <bad_example score="4.0">
 <config>
-{
+{{
   "name": "broken-server",
   "install": null,
   "command": "npx",
   "args": ["@modelcontextprotocol/server-filesystem"],
-  "env": {}
-}
+  "env": {{}}
+}}
 </config>
 <issues>
 - Missing -y flag in npx args (will hang waiting for user input)
@@ -147,13 +147,13 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <bad_example score="3.0">
 <config>
-{
+{{
   "name": "incomplete-docker",
   "install": "docker pull myimage",
   "command": "docker",
   "args": ["run", "myimage"],
-  "env": {}
-}
+  "env": {{}}
+}}
 </config>
 <issues>
 - Missing --rm flag (containers won't be cleaned up)
@@ -164,20 +164,20 @@ MCP servers are protocol-compliant servers that expose tools and prompts to AI a
 
 <bad_example score="5.5">
 <config>
-{
+{{
   "name": "poor-env-docs",
   "install": null,
   "command": "npx",
   "args": ["-y", "some-server"],
-  "env": {
-    "API_KEY": {
+  "env": {{
+    "API_KEY": {{
       "required": true,
       "description": "API key",
       "default": null,
       "example": "xxx"
-    }
-  }
-}
+    }}
+  }}
+}}
 </config>
 <issues>
 - Description too vague ("API key" doesn't help user)
@@ -316,15 +316,15 @@ Round to 1 decimal place (e.g., 7.5, not 7.53)
 <output_format>
 You MUST return ONLY valid JSON, no markdown, no explanation, no preamble.
 
-{
+{{{{
   "evaluations": [
-    {
+    {{{{
       "index": 0,
       "score": 9.0,
       "reasoning": "Brief explanation of score",
       "issues": []
-    },
-    {
+    }}}},
+    {{{{
       "index": 1,
       "score": 6.5,
       "reasoning": "Identified 3 problems affecting score",
@@ -333,9 +333,9 @@ You MUST return ONLY valid JSON, no markdown, no explanation, no preamble.
         "API_KEY description too vague (-0.5 pts)",
         "No where_to_get for required API key (-0.5 pts)"
       ]
-    }
+    }}}}
   ]
-}
+}}}}
 
 CRITICAL RULES:
 1. Return ONLY the JSON object (no ```json blocks, no text before/after)

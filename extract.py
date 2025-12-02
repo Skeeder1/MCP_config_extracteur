@@ -5,8 +5,8 @@ Unified CLI entry point for MCP config extraction.
 Usage:
     python extract.py crawl              # Run Phase 1 (GitHub crawler)
     python extract.py extract            # Run Phase 2 (LLM extraction)
-    python extract.py validate <file>    # Validate output
-    python extract.py analyze <file>     # Analyze quality
+    python extract.py validate           # Validate PostgreSQL data
+    python extract.py analyze            # Analyze quality from PostgreSQL
     python extract.py pipeline           # Run full pipeline (default)
 """
 import sys
@@ -14,7 +14,7 @@ import argparse
 import asyncio
 from pathlib import Path
 
-# Import existing entry points (no code changes to them!)
+# Import existing entry points
 from run_crawler import main as crawler_main
 from run_extractor import main_async as extractor_main
 
@@ -30,8 +30,8 @@ Examples:
     python extract.py pipeline           # Run full pipeline explicitly
     python extract.py crawl              # Run Phase 1 only
     python extract.py extract            # Run Phase 2 only
-    python extract.py validate <file>    # Validate extraction output
-    python extract.py analyze <file>     # Analyze extraction quality
+    python extract.py validate           # Validate PostgreSQL data
+    python extract.py analyze            # Analyze extraction quality from PostgreSQL
 
 For more help on each command, use:
     python extract.py <command> --help
@@ -47,12 +47,10 @@ For more help on each command, use:
     extract = subparsers.add_parser('extract', help='Run LLM extraction (Phase 2)')
 
     # Validate command
-    validate = subparsers.add_parser('validate', help='Validate extraction output')
-    validate.add_argument('file', help='Extraction output file')
+    validate = subparsers.add_parser('validate', help='Validate PostgreSQL data')
 
     # Analyze command
-    analyze = subparsers.add_parser('analyze', help='Analyze extraction quality')
-    analyze.add_argument('file', help='Extraction output file')
+    analyze = subparsers.add_parser('analyze', help='Analyze extraction quality from PostgreSQL')
 
     # Pipeline command (default)
     pipeline = subparsers.add_parser('pipeline', help='Run full pipeline (crawl + extract + validate)')
@@ -72,15 +70,15 @@ For more help on each command, use:
 
         elif args.command == 'validate':
             sys.path.insert(0, 'scripts')
-            from validate_extraction_output import main as validate_main
-            sys.argv = ['validate_extraction_output.py', args.file]
-            return validate_main()
+            from validate_extraction_output import validate_extraction_output
+            success = validate_extraction_output()
+            return 0 if success else 1
 
         elif args.command == 'analyze':
             sys.path.insert(0, 'scripts')
-            from analyze_extraction_quality import main as analyze_main
-            sys.argv = ['analyze_extraction_quality.py', args.file]
-            return analyze_main()
+            from analyze_extraction_quality import analyze_extraction_quality
+            analyze_extraction_quality()
+            return 0
 
         elif args.command == 'pipeline':
             print("\n" + "="*70)
@@ -101,14 +99,13 @@ For more help on each command, use:
 
             print("\n✅ Phase 3: Validation...\n")
             sys.path.insert(0, 'scripts')
-            from validate_extraction_output import main as validate_main
-            sys.argv = ['validate_extraction_output.py', 'data/output/extracted_configs.json']
-            validate_main()
+            from validate_extraction_output import validate_extraction_output
+            validate_extraction_output()
 
             print("\n" + "="*70)
             print("  ✅ PIPELINE COMPLETED")
             print("="*70)
-            print(f"  Output: data/output/extracted_configs.json")
+            print(f"  All data stored in PostgreSQL")
             print("="*70 + "\n")
 
             return 0

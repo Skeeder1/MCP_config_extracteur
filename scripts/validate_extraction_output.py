@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Validate extraction output against expected schema."""
+"""Validate extraction output from PostgreSQL database."""
 
-import json
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from src.database.db_manager import DatabaseManager
+from src.database.repositories.servers_repository import ServersRepository
+from src.database.repositories.configs_repository import ConfigsRepository
 
 
 def validate_config_schema(config: Dict, server_name: str) -> Tuple[bool, List[str]]:
@@ -79,75 +85,158 @@ def validate_config_schema(config: Dict, server_name: str) -> Tuple[bool, List[s
     return len(errors) == 0, errors
 
 
-def validate_extraction_output(file_path: str):
-    """Validate the entire extraction output file."""
+def validate_database_integrity(db_manager: DatabaseManager) -> Tuple[bool, List[str]]:
+    """
+    Validate database integrity constraints.
 
-    print(f"📋 Validation de {file_path}\n")
+    Returns: (is_valid, errors)
+    """
+    errors = []
+
+    # Check for NULL values in NOT NULL columns
+    null_checks = [
+        ("mcp_servers", "slug", "SELECT COUNT(*) FROM mcp_servers WHERE slug IS NULL"),
+        ("mcp_servers", "name", "SELECT COUNT(*) FROM mcp_servers WHERE name IS NULL"),
+        ("mcp_servers", "github_url", "SELECT COUNT(*) FROM mcp_servers WHERE github_url IS NULL"),
+        ("mcp_configs", "server_id", "SELECT COUNT(*) FROM mcp_configs WHERE server_id IS NULL"),
+        ("mcp_configs", "config_json", "SELECT COUNT(*) FROM mcp_configs WHERE config_json IS NULL"),
+    ]
+
+    for table, column, query in null_checks:
+        count = db_manager.fetch_value(query)
+        if count and count > 0:
+            errors.append(f"{table}.{column}: Found {count} NULL values in NOT NULL column")
+
+    # Check foreign key integrity
+    orphaned_configs = db_manager.fetch_value("""
+        SELECT COUNT(*)
+        FROM mcp_configs c
+        LEFT JOIN mcp_servers s ON s.id = c.server_id
+        WHERE s.id IS NULL
+    """)
+    if orphaned_configs and orphaned_configs > 0:
+        errors.append(f"Found {orphaned_configs} orphaned configs (server_id doesn't exist)")
+
+    # Check UNIQUE constraints
+    duplicate_slugs = db_manager.fetch_value("""
+        SELECT COUNT(*)
+        FROM (
+            SELECT slug, COUNT(*) as cnt
+            FROM mcp_servers
+            GROUP BY slug
+            HAVING COUNT(*) > 1
+        ) t
+    """)
+    if duplicate_slugs and duplicate_slugs > 0:
+        errors.append(f"Found {duplicate_slugs} duplicate slugs in mcp_servers")
+
+    duplicate_github_urls = db_manager.fetch_value("""
+        SELECT COUNT(*)
+        FROM (
+            SELECT github_url, COUNT(*) as cnt
+            FROM mcp_servers
+            GROUP BY github_url
+            HAVING COUNT(*) > 1
+        ) t
+    """)
+    if duplicate_github_urls and duplicate_github_urls > 0:
+        errors.append(f"Found {duplicate_github_urls} duplicate github_urls in mcp_servers")
+
+    # Check status constraint
+    invalid_status = db_manager.fetch_value("""
+        SELECT COUNT(*)
+        FROM mcp_servers
+        WHERE status NOT IN ('approved', 'pending', 'rejected')
+    """)
+    if invalid_status and invalid_status > 0:
+        errors.append(f"Found {invalid_status} servers with invalid status")
+
+    # Check config_type constraint
+    invalid_config_type = db_manager.fetch_value("""
+        SELECT COUNT(*)
+        FROM mcp_configs
+        WHERE config_type NOT IN ('npm', 'docker', 'python', 'binary', 'inferred', 'other')
+    """)
+    if invalid_config_type and invalid_config_type > 0:
+        errors.append(f"Found {invalid_config_type} configs with invalid config_type")
+
+    return len(errors) == 0, errors
+
+
+def validate_extraction_output(db_manager: DatabaseManager = None):
+    """Validate the extraction output from PostgreSQL database."""
+
+    print(f"📋 Validation de la base de données PostgreSQL\n")
     print("=" * 70)
 
-    # Load JSON
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print(f"❌ Fichier introuvable: {file_path}")
-        return False
-    except json.JSONDecodeError as e:
-        print(f"❌ JSON invalide: {e}")
-        return False
+    # Initialize database
+    if db_manager is None:
+        db_manager = DatabaseManager()
 
-    # Validate top-level structure
-    if "metadata" not in data:
-        print("❌ Champ 'metadata' manquant")
+    servers_repo = ServersRepository(db_manager)
+    configs_repo = ConfigsRepository(db_manager)
+
+    # Get all servers
+    all_servers = servers_repo.get_all_servers()
+
+    if not all_servers:
+        print("❌ Aucun serveur trouvé dans la base de données")
         return False
 
-    if "extractions" not in data:
-        print("❌ Champ 'extractions' manquant")
-        return False
+    # Get statistics
+    total_servers = len(all_servers)
+    with_config = db_manager.fetch_value("SELECT COUNT(DISTINCT server_id) FROM mcp_configs") or 0
+    without_config = total_servers - with_config
 
-    if not isinstance(data["extractions"], list):
-        print("❌ 'extractions' doit être un array")
-        return False
+    status_counts = {}
+    for server in all_servers:
+        status = server.get('status', 'unknown')
+        status_counts[status] = status_counts.get(status, 0) + 1
 
-    # Validate metadata
-    metadata = data["metadata"]
-    required_metadata_fields = ["extracted_at", "source_file", "model", "test_mode", "stats"]
-    for field in required_metadata_fields:
-        if field not in metadata:
-            print(f"❌ metadata.{field} manquant")
-            return False
-
-    # Stats
-    stats = metadata["stats"]
     print(f"\n📊 Statistiques globales:")
-    print(f"  Model: {metadata['model']}")
-    print(f"  Total: {stats['total_repos']} serveurs")
-    print(f"  Approuvés: {stats['approved']}")
-    print(f"  À réviser: {stats['needs_review']}")
-    print(f"  Rejetés: {stats['rejected']}")
-    print(f"  Taux de succès: {stats['success_rate']}%")
+    print(f"  Total: {total_servers} serveurs")
+    print(f"  Avec config: {with_config}")
+    print(f"  Sans config: {without_config}")
+    print(f"  Par status:")
+    for status, count in sorted(status_counts.items()):
+        print(f"    - {status}: {count}")
     print()
 
-    # Validate each extraction
+    # Validate database integrity
+    print("🔒 Validation de l'intégrité de la base de données:\n")
+    integrity_valid, integrity_errors = validate_database_integrity(db_manager)
+
+    if integrity_valid:
+        print("  ✅ Intégrité de la base de données: OK")
+    else:
+        print(f"  ❌ Intégrité de la base de données: {len(integrity_errors)} erreurs")
+        for error in integrity_errors:
+            print(f"     - {error}")
+    print()
+
+    # Validate each config
     all_valid = True
     total_errors = []
 
-    print("🔍 Validation de chaque extraction:\n")
+    print("🔍 Validation de chaque configuration:\n")
 
-    for i, extraction in enumerate(data["extractions"], 1):
-        server_name = extraction.get("github_metadata", {}).get("name", f"Server {i}")
-        status = extraction.get("extraction", {}).get("status", "unknown")
-        confidence = extraction.get("extraction", {}).get("confidence", 0.0)
+    for i, server in enumerate(all_servers, 1):
+        server_id = server['id']
+        server_name = server.get('name', f"Server {i}")
+        status = server.get('status', 'unknown')
 
-        # Skip rejected without config
-        if status == "rejected" and extraction.get("config") is None:
-            print(f"  [{i}] ⚠️  {server_name}: Rejeté (confidence: {confidence:.2f})")
-            if "error" in extraction:
-                print(f"       Erreur: {extraction['error'][:100]}")
+        # Get config for this server
+        config_data = configs_repo.get_config_by_server_id(server_id)
+
+        # Skip servers without config
+        if config_data is None:
+            print(f"  [{i}] ⚠️  {server_name}: Pas de config (status: {status})")
             continue
 
-        # Validate config
-        config = extraction.get("config", {})
+        # Get the JSONB config
+        config = config_data.get('config_json', {})
+
+        # Validate config schema
         is_valid, errors = validate_config_schema(config, server_name)
 
         if is_valid:
@@ -156,7 +245,7 @@ def validate_extraction_output(file_path: str):
             has_env_vars = len(config.get("env", {})) > 0
             completeness = "complet" if has_install and has_env_vars else "partiel"
 
-            print(f"  [{i}] ✅ {server_name}: {status.upper()} (confidence: {confidence:.2f}, {completeness})")
+            print(f"  [{i}] ✅ {server_name}: {status.upper()} ({completeness})")
 
             # Show command summary
             command = config.get("command", "N/A")
@@ -174,15 +263,15 @@ def validate_extraction_output(file_path: str):
 
     # Summary
     print("=" * 70)
-    if all_valid:
-        print("✅ VALIDATION RÉUSSIE: Toutes les extractions sont conformes au schéma")
+    if all_valid and integrity_valid:
+        print("✅ VALIDATION RÉUSSIE: Toutes les configurations sont conformes")
         return True
     else:
-        print(f"❌ VALIDATION ÉCHOUÉE: {len(total_errors)} erreurs détectées")
+        total_error_count = len(total_errors) + len(integrity_errors)
+        print(f"❌ VALIDATION ÉCHOUÉE: {total_error_count} erreurs détectées")
         return False
 
 
 if __name__ == "__main__":
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "data/output/extracted_configs.json"
-    success = validate_extraction_output(file_path)
+    success = validate_extraction_output()
     sys.exit(0 if success else 1)

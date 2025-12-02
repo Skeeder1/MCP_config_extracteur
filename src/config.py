@@ -18,9 +18,8 @@ class CrawlerConfig(BaseSettings):
     max_retries: int = 3
     retry_delay_seconds: int = 2
 
-    # File paths
+    # Input file (list of servers to crawl)
     input_file: str = "data/input/top_200_mcp_servers.json"
-    output_file: str = "data/output/github_crawled_data.json"
 
     class Config:
         env_file = ".env"
@@ -60,8 +59,6 @@ class ExtractorConfig(BaseSettings):
     needs_review_threshold: float = 0.7
 
     # File paths
-    input_file: str = "data/output/github_crawled_data.json"
-    output_file: str = "data/output/extracted_configs.json"
     prompt_template_file: str = "config/extraction_prompt.txt"
     validation_prompt_file: str = "config/validation_prompt.txt"
     prompts_dir: str = "prompts"
